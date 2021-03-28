@@ -43,10 +43,13 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
                 isDarkMode = settings.isDarkMode,
                 isBigText = settings.isBigText
             )
-
+        }
+        subscribeOnDataSource(repository.getSearchStatus()) { searchStatus, state ->
+            state.copy(
+                isSearch = searchStatus
+            )
         }
     }
-
 
     override fun getArticleContent(): LiveData<List<Any>?> {
         return repository.loadArticleContent(articleId)
@@ -107,7 +110,8 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
     }
 
     override fun handleSearchMode(isSearch: Boolean) {
-        updateState { it.copy(isSearch = isSearch) }
+        repository.updateSearchStatus(isSearch)
+        //updateState { it.copy(isSearch = isSearch) }
         val msg = if (currentState.isSearch) Notify.TextMessage("Enter in search mode")
         else Notify.TextMessage("Exit from search mode")
         notify(msg)
@@ -117,3 +121,27 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
         updateState { it.copy(searchQuery = query) }
     }
 }
+
+data class ArticleState(
+    val isAuth:Boolean = false, //пользователь авторизован
+    val isLoadingContent: Boolean = true, //контент загружается
+    val isLoadingReviews:Boolean = true, //отзывы загружаются
+    val isLike:Boolean = false, //отмечено как Like
+    val isBookmark:Boolean = false, //в закладках
+    val isShowMenu:Boolean = false, //отображается меню
+    val isBigText: Boolean = false, //шрифт увеличен
+    val isDarkMode:Boolean = false, //темный режим
+    val isSearch:Boolean = false, //режим поиска
+    val searchQuery:String? = null, //поисковый запрос
+    val searchResults:List<Pair<Int, Int>> = emptyList(), //результаты поиска (стартовая и конечная позиции)
+    val searchPosition: Int = 0, //текущая позиция найденного результата
+    val shareLink:String? = null, //ссылка Share
+    val title: String? = null, //заголовок статьи
+    val category: String? = null, //категория
+    val categoryIcon:Any? = null, //иконка категории
+    val date:String? = null, //дата публикации
+    val author: Any? = null, //автор статьи
+    val poster:String? = null, //обложка статьи
+    val content: List<Any> = emptyList(), //контент
+    val reviews:List<Any> = emptyList() //комментарии
+)

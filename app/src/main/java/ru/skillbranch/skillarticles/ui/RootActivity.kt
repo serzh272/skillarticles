@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textview.MaterialTextView
@@ -119,7 +120,12 @@ class RootActivity : AppCompatActivity() {
         }
         val action:MenuItem? =  binding.toolbar.menu.findItem(R.id.action_search)
         val searchView = action?.actionView as? SearchView
-        if (data.isSearch) action?.expandActionView() else action?.collapseActionView()
+        if (data.isSearch) {
+            action?.expandActionView()
+            searchView?.clearFocus()
+        } else {
+            action?.collapseActionView()
+        }
         searchView?.setQuery(data.searchQuery, false)
     }
 
