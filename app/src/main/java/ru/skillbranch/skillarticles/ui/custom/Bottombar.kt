@@ -2,13 +2,10 @@ package ru.skillbranch.skillarticles.ui.custom
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.LayoutInflater
 import android.view.View
-import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.shape.MaterialShapeDrawable
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.databinding.LayoutBottombarBinding
 
 class Bottombar @JvmOverloads constructor(
     context: Context,
@@ -18,7 +15,7 @@ class Bottombar @JvmOverloads constructor(
 ): ConstraintLayout(context, attrs, defStyleAttr)
 {
     init {
-        LayoutBottombarBinding.inflate(LayoutInflater.from(context), this)
+        View.inflate(context, R.layout.layout_bottombar, this)
         val materialBg = MaterialShapeDrawable.createWithElevationOverlay(context)
         materialBg.elevation = elevation
         background = materialBg
