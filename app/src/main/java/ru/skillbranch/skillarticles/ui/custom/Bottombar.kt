@@ -7,7 +7,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.shape.MaterialShapeDrawable
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.ui.custom.behaviors.BottomBarBehavior
+import ru.skillbranch.skillarticles.ui.custom.behaviors.BottombarBehavior
 
 class Bottombar @JvmOverloads constructor(
     context: Context,
@@ -24,6 +24,6 @@ class Bottombar @JvmOverloads constructor(
     }
 
     override fun getBehavior(): CoordinatorLayout.Behavior<*> {
-        return BottomBarBehavior()
+        return BottombarBehavior()
     }
 }
