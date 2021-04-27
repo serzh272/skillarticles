@@ -110,14 +110,13 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
     }
 
     override fun handleSearchMode(isSearch: Boolean) {
-        repository.updateSearchStatus(isSearch)
-        //updateState { it.copy(isSearch = isSearch) }
-        val msg = if (currentState.isSearch) Notify.TextMessage("Enter in search mode")
-        else Notify.TextMessage("Exit from search mode")
-        notify(msg)
+        updateState { it.copy(isSearch = isSearch, isShowMenu = false, searchPosition = 0) }
+
     }
 
     override fun handleSearch(query: String?) {
+        query ?: return
+        val result = currentState.content.firstOrNull()
         updateState { it.copy(searchQuery = query) }
     }
 }

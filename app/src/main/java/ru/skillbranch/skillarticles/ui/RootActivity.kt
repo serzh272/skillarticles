@@ -33,9 +33,7 @@ class RootActivity : AppCompatActivity() {
         setupToolbar()
         setupBottomBar()
         setupSubmenu()
-        viewModel.observeState(this) {
-            renderUi(it)
-        }
+        viewModel.observeState(this, ::renderUi)
         viewModel.observeNotifications(this) {
             renderNotification(it)
         }
@@ -68,7 +66,6 @@ class RootActivity : AppCompatActivity() {
     }
 
     private fun setupSubmenu() {
-
         vbSubmenu.btnTextUp.setOnClickListener { viewModel.handleUpText() }
         vbSubmenu.btnTextDown.setOnClickListener { viewModel.handleDownText() }
         vbSubmenu.switchMode.setOnClickListener { viewModel.handleNightMode() }
@@ -104,15 +101,6 @@ class RootActivity : AppCompatActivity() {
         vb.toolbar.title = data.title ?: "loading"
         vb.toolbar.subtitle = data.category ?: "loading"
         if (data.categoryIcon != null) vb.toolbar.logo = getDrawable(data.categoryIcon as Int)
-        val action: MenuItem? = vb.toolbar.menu.findItem(R.id.action_search)
-        val searchView = action?.actionView as? SearchView
-        if (data.isSearch) {
-            action?.expandActionView()
-            searchView?.clearFocus()
-        } else {
-            action?.collapseActionView()
-        }
-        searchView?.setQuery(data.searchQuery, false)
     }
 
     private fun setupToolbar() {
@@ -132,50 +120,44 @@ class RootActivity : AppCompatActivity() {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        when (item.itemId){
-//            R.id.action_search -> viewModel.handleSearchMode(true)
-//        }
-        return super.onOptionsItemSelected(item)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_search, menu)
-        val action = menu?.findItem(R.id.action_search)
-//        action?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener{
-//            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-//                viewModel.handleSearchMode(true)
-//                return true
-//            }
-//
-//            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-//                viewModel.handleSearchMode(false)
-//                return true
-//            }
-//
-//        })
-        val searchView = action?.actionView as? SearchView
-        searchView?.queryHint = "Search"
+        val menuItem = menu?.findItem(R.id.action_search)
+
+        val searchView = menuItem?.actionView as? SearchView
+        searchView?.queryHint = getString(R.string.article_search_placeholder)
+
+        if (viewModel.currentState.isSearch){
+            menuItem?.expandActionView()
+            searchView?.setQuery(viewModel.currentState.searchQuery, false)
+            searchView?.requestFocus()
+        }else{
+            searchView?.clearFocus()
+        }
+
+        menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                viewModel.handleSearchMode(true)
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                viewModel.handleSearchMode(false)
+                return true
+            }
+        })
+
         searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                if (query.isNullOrEmpty()) return false
                 viewModel.handleSearch(query)
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                if (newText.isNullOrEmpty()) return false
                 viewModel.handleSearch(newText)
                 return true
             }
         })
-        searchView?.setOnCloseListener {
-            viewModel.handleSearchMode(false)
-            true
-        }
-        searchView?.setOnSearchClickListener {
-            viewModel.handleSearchMode(true)
-        }
         return super.onCreateOptionsMenu(menu)
     }
 }
