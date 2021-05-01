@@ -55,6 +55,17 @@ abstract class BaseViewModel<T>(initState: T) : ViewModel() {
     }
 
     /***
+     * вспомогательная функция, позволяющая наблюдать за изменениями части стейта ViewModel
+     * выражение обрабатывающее изменение текущего стостояния
+     */
+    fun <D> observeSubState(owner: LifecycleOwner, transform:(T) ->  D, onChanged: (subState: D) -> Unit) {
+        state
+            .map(transform)
+            .distinctUntilChanged()
+            .observe(owner, Observer { onChanged(it!!) })
+    }
+
+    /***
      * более компактная форма записи observe() метода LiveData вызывает лямбда выражение обработчик
      * только в том случае если уведомление не было уже обработанно ранее,
      * реализует данное поведение с помощью EventObserver

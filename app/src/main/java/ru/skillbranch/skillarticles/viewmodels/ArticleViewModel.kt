@@ -51,7 +51,7 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
         }
     }
 
-    override fun getArticleContent(): LiveData<List<Any>?> {
+    override fun getArticleContent(): LiveData<List<String>?> {
         return repository.loadArticleContent(articleId)
     }
 
@@ -122,25 +122,45 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
 }
 
 data class ArticleState(
-    val isAuth:Boolean = false, //пользователь авторизован
+    val isAuth: Boolean = false, //пользователь авторизован
     val isLoadingContent: Boolean = true, //контент загружается
-    val isLoadingReviews:Boolean = true, //отзывы загружаются
-    val isLike:Boolean = false, //отмечено как Like
-    val isBookmark:Boolean = false, //в закладках
-    val isShowMenu:Boolean = false, //отображается меню
+    val isLoadingReviews: Boolean = true, //отзывы загружаются
+    val isLike: Boolean = false, //отмечено как Like
+    val isBookmark: Boolean = false, //в закладках
+    val isShowMenu: Boolean = false, //отображается меню
     val isBigText: Boolean = false, //шрифт увеличен
-    val isDarkMode:Boolean = false, //темный режим
-    val isSearch:Boolean = false, //режим поиска
-    val searchQuery:String? = null, //поисковый запрос
-    val searchResults:List<Pair<Int, Int>> = emptyList(), //результаты поиска (стартовая и конечная позиции)
+    val isDarkMode: Boolean = false, //темный режим
+    val isSearch: Boolean = false, //режим поиска
+    val searchQuery: String? = null, //поисковый запрос
+    val searchResults: List<Pair<Int, Int>> = emptyList(), //результаты поиска (стартовая и конечная позиции)
     val searchPosition: Int = 0, //текущая позиция найденного результата
-    val shareLink:String? = null, //ссылка Share
+    val shareLink: String? = null, //ссылка Share
     val title: String? = null, //заголовок статьи
     val category: String? = null, //категория
-    val categoryIcon:Any? = null, //иконка категории
-    val date:String? = null, //дата публикации
+    val categoryIcon: Any? = null, //иконка категории
+    val date: String? = null, //дата публикации
     val author: Any? = null, //автор статьи
-    val poster:String? = null, //обложка статьи
-    val content: List<Any> = emptyList(), //контент
-    val reviews:List<Any> = emptyList() //комментарии
+    val poster: String? = null, //обложка статьи
+    val content: List<String> = emptyList(), //контент
+    val reviews: List<Any> = emptyList() //комментарии
 )
+
+data class BottombarData(
+    val isLike: Boolean = false, //отмечено как Like
+    val isBookmark: Boolean = false, //в закладках
+    val isShowMenu: Boolean = false, //отображается меню
+    val isSearch: Boolean = false, //режим поиска
+    val resultsCount: Int = 0, //количество найденных вхождений
+    val searchPosition: Int = 0 //текущая позиция найденного результата
+)
+
+data class SubmenuData(
+    val isShowMenu: Boolean = false, //отображается меню
+    val isBigText: Boolean = false, //шрифт увеличен
+    val isDarkMode: Boolean = false, //темный режим
+)
+
+fun ArticleState.toBottomBarData() =
+    BottombarData(isLike, isBookmark, isShowMenu, isSearch, searchResults.size, searchPosition)
+
+fun ArticleState.toSubMenuData() = SubmenuData(isShowMenu, isBigText, isDarkMode)
