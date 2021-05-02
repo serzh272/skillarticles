@@ -7,6 +7,7 @@ import ru.skillbranch.skillarticles.data.repositories.ArticleRepository
 import ru.skillbranch.skillarticles.extensions.data.toAppSettings
 import ru.skillbranch.skillarticles.extensions.data.toArticlePersonalInfo
 import ru.skillbranch.skillarticles.extensions.format
+import ru.skillbranch.skillarticles.extensions.indexesOf
 
 class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleState>(ArticleState()),
     IArticleViewModel {
@@ -116,8 +117,17 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
 
     override fun handleSearch(query: String?) {
         query ?: return
-        val result = currentState.content.firstOrNull()
-        updateState { it.copy(searchQuery = query) }
+        val result = currentState.content.firstOrNull().indexesOf(query)
+            .map { it to it + query.length }
+        updateState { it.copy(searchQuery = query, searchResults = result) }
+    }
+
+    override fun handleUpResult() {
+        updateState { it.copy(searchPosition = it.searchPosition.dec()) }
+    }
+
+    override fun handleDownResult() {
+        updateState { it.copy(searchPosition = it.searchPosition.inc()) }
     }
 }
 

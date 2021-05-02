@@ -79,6 +79,12 @@ class RootActivity : AppCompatActivity(), IArticleView {
             btnBookmark.setOnClickListener { viewModel.handleBookmark() }
             btnSettings.setOnClickListener { viewModel.handleToggleMenu() }
             btnShare.setOnClickListener { viewModel.handleShare() }
+            btnResultUp.setOnClickListener { viewModel.handleUpResult() }
+            btnResultDown.setOnClickListener { viewModel.handleDownResult() }
+            btnSearchClose.setOnClickListener {
+                viewModel.handleSearchMode(false)
+                invalidateOptionsMenu()
+            }
         }
     }
 

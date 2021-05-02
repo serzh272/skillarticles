@@ -27,6 +27,7 @@ class Bottombar @JvmOverloads constructor(
         val materialBg = MaterialShapeDrawable.createWithElevationOverlay(context)
         materialBg.elevation = elevation
         background = materialBg
+        binding.btnResultUp.isEnabled = true
     }
 
     override fun getBehavior(): CoordinatorLayout.Behavior<*> {
