@@ -1,19 +1,28 @@
 package ru.skillbranch.skillarticles.ui
 
 import android.os.Bundle
+import android.text.Selection
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.method.ScrollingMovementMethod
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.text.getSpans
 import com.google.android.material.snackbar.Snackbar
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.databinding.ActivityRootBinding
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.setMarginOptionally
+import ru.skillbranch.skillarticles.ui.custom.SearchFocusSpan
+import ru.skillbranch.skillarticles.ui.custom.SearchSpan
+import ru.skillbranch.skillarticles.ui.delegates.AttrValue
 import ru.skillbranch.skillarticles.ui.delegates.viewBinding
 import ru.skillbranch.skillarticles.viewmodels.*
 
@@ -24,6 +33,9 @@ class RootActivity : AppCompatActivity(), IArticleView {
         get() = vb.bottombar.binding
     private val vbSubmenu
         get() = vb.submenu.binding
+    private lateinit var searchView: SearchView
+    private val bgColor by AttrValue(R.attr.colorSecondary)
+    private val fgColor by AttrValue(R.attr.colorOnSecondary)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,8 +91,16 @@ class RootActivity : AppCompatActivity(), IArticleView {
             btnBookmark.setOnClickListener { viewModel.handleBookmark() }
             btnSettings.setOnClickListener { viewModel.handleToggleMenu() }
             btnShare.setOnClickListener { viewModel.handleShare() }
-            btnResultUp.setOnClickListener { viewModel.handleUpResult() }
-            btnResultDown.setOnClickListener { viewModel.handleDownResult() }
+            btnResultUp.setOnClickListener {
+                searchView.clearFocus()
+                vb.tvTextContent.requestFocus()
+                viewModel.handleUpResult() 
+            }
+            btnResultDown.setOnClickListener {
+                searchView.clearFocus()
+                vb.tvTextContent.requestFocus()
+                viewModel.handleDownResult() 
+            }
             btnSearchClose.setOnClickListener {
                 viewModel.handleSearchMode(false)
                 invalidateOptionsMenu()
@@ -114,12 +134,21 @@ class RootActivity : AppCompatActivity(), IArticleView {
             else AppCompatDelegate.MODE_NIGHT_NO
         with(vb.tvTextContent){
             textSize = if(data.isBigText) 18f else 14f
-            text = if(data.isLoadingContent) "loading" else data.content.first()
-            //TODO set content as spannable
+            setText(if(data.isLoadingContent) "loading" else data.content.first(), TextView.BufferType.SPANNABLE)
+            movementMethod = ScrollingMovementMethod()
         }
-        vb.toolbar.title = data.title ?: "loading"
-        vb.toolbar.subtitle = data.category ?: "loading"
-        if (data.categoryIcon != null) vb.toolbar.logo = getDrawable(data.categoryIcon as Int)
+
+        with(vb.toolbar){
+            title = data.title ?: "loading"
+            subtitle = data.category ?: "loading"
+            if (data.categoryIcon != null) logo = getDrawable(data.categoryIcon as Int)
+        }
+
+        if (data.isLoadingContent) return
+        if (data.isSearch){
+            renderSearchResult(data.searchResults)
+            renderSearchPosition(data.searchPosition)
+        }else clearSearchResult()
     }
 
     override fun setupToolbar() {
@@ -140,15 +169,40 @@ class RootActivity : AppCompatActivity(), IArticleView {
     }
 
     override fun renderSearchResult(searchResult: List<Pair<Int, Int>>) {
-        //TODO("Not yet implemented")
+        val content = vb.tvTextContent.text as Spannable
+        clearSearchResult()
+        searchResult.forEach { (start, end) ->
+            content.setSpan(
+                SearchSpan(bgColor, fgColor),
+                start,
+                end,
+                SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
     }
 
     override fun renderSearchPosition(searchPosition: Int) {
-        //TODO("Not yet implemented")
+        val content = vb.tvTextContent.text as Spannable
+        val spans = content.getSpans<SearchSpan>()
+        content.getSpans<SearchFocusSpan>()
+            .forEach { content.removeSpan(it) }
+        if (spans.isNotEmpty()){
+            val result = spans[searchPosition]
+            Selection.setSelection(content, content.getSpanStart(result))
+            content.setSpan(
+                SearchFocusSpan(bgColor, fgColor),
+                content.getSpanStart(result),
+                content.getSpanEnd(result),
+                SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
     }
 
     override fun clearSearchResult() {
-        //TODO("Not yet implemented")
+        val content = vb.tvTextContent.text as Spannable
+        content.getSpans<SearchSpan>()
+            .forEach { content.removeSpan(it) }
+
     }
 
     override fun showSearchBar(resultsCount: Int, searchPosition: Int) {
@@ -170,18 +224,18 @@ class RootActivity : AppCompatActivity(), IArticleView {
         menuInflater.inflate(R.menu.menu_search, menu)
         val menuItem = menu?.findItem(R.id.action_search)
 
-        val searchView = menuItem?.actionView as? SearchView
-        searchView?.queryHint = getString(R.string.article_search_placeholder)
+        searchView = (menuItem?.actionView as? SearchView)!!
+        searchView.queryHint = getString(R.string.article_search_placeholder)
 
         if (viewModel.currentState.isSearch) {
-            menuItem?.expandActionView()
-            searchView?.setQuery(viewModel.currentState.searchQuery, false)
-            searchView?.requestFocus()
+            menuItem.expandActionView()
+            searchView.setQuery(viewModel.currentState.searchQuery, false)
+            searchView.requestFocus()
         } else {
-            searchView?.clearFocus()
+            searchView.clearFocus()
         }
 
-        menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+        menuItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 viewModel.handleSearchMode(true)
                 return true
@@ -193,7 +247,7 @@ class RootActivity : AppCompatActivity(), IArticleView {
             }
         })
 
-        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 viewModel.handleSearch(query)
                 return true
