@@ -1,6 +1,7 @@
 package ru.skillbranch.skillarticles.ui
 
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.text.Selection
 import android.text.Spannable
 import android.text.SpannableString
@@ -10,11 +11,13 @@ import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.text.getSpans
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.databinding.ActivityRootBinding
@@ -28,14 +31,21 @@ import ru.skillbranch.skillarticles.viewmodels.*
 
 class RootActivity : AppCompatActivity(), IArticleView {
     private val vb: ActivityRootBinding by viewBinding(ActivityRootBinding::inflate)
-    private val viewModel: ArticleViewModel by viewModels { ViewModelFactory("0") }
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var viewModelFactory: ViewModelProvider.Factory = ViewModelFactory(this, "0")
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    private val viewModel: ArticleViewModel by viewModels { ViewModelFactory(this, "0") }
     private val vbBottomBar
         get() = vb.bottombar.binding
     private val vbSubmenu
         get() = vb.submenu.binding
     private lateinit var searchView: SearchView
-    private val bgColor by AttrValue(R.attr.colorSecondary)
-    private val fgColor by AttrValue(R.attr.colorOnSecondary)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val bgColor by AttrValue(R.attr.colorSecondary)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val fgColor by AttrValue(R.attr.colorOnSecondary)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,12 +54,18 @@ class RootActivity : AppCompatActivity(), IArticleView {
         setupBottomBar()
         setupSubmenu()
         viewModel.observeState(this, ::renderUi)
-        viewModel.observeSubState(this, ArticleState::toBottomBarData, ::renderBottomBar)
-        viewModel.observeSubState(this, ArticleState::toSubMenuData, ::renderSubmenu)
+        viewModel.observeSubState(this, ArticleState::toBottombarData, ::renderBotombar)
+        viewModel.observeSubState(this, ArticleState::toSubmenuData, ::renderSubmenu)
         viewModel.observeNotifications(this) {
             renderNotification(it)
         }
     }
+
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+        viewModel.saveState()
+        super.onSaveInstanceState(outState, outPersistentState)
+    }
+
 
     private fun renderNotification(notify: Notify) {
         val snackbar = Snackbar.make(vb.coordinatorContainer, notify.message, Snackbar.LENGTH_LONG)
@@ -108,7 +124,7 @@ class RootActivity : AppCompatActivity(), IArticleView {
         }
     }
 
-    override fun renderBottomBar(data: BottombarData) {
+    override fun renderBotombar(data: BottombarData) {
         with(vbBottomBar){
             btnLike.isChecked = data.isLike
             btnBookmark.isChecked = data.isBookmark
@@ -134,8 +150,10 @@ class RootActivity : AppCompatActivity(), IArticleView {
             else AppCompatDelegate.MODE_NIGHT_NO
         with(vb.tvTextContent){
             textSize = if(data.isBigText) 18f else 14f
-            setText(if(data.isLoadingContent) "loading" else data.content.first(), TextView.BufferType.SPANNABLE)
             movementMethod = ScrollingMovementMethod()
+            val content = if(data.isLoadingContent) "loading" else data.content.first()
+            if (text.toString() == content) return@with
+            setText(content, TextView.BufferType.SPANNABLE)
         }
 
         with(vb.toolbar){

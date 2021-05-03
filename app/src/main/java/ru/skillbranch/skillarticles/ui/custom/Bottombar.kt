@@ -1,6 +1,8 @@
 package ru.skillbranch.skillarticles.ui.custom
 
 import android.content.Context
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.ViewAnimationUtils
@@ -28,6 +30,22 @@ class Bottombar @JvmOverloads constructor(
         materialBg.elevation = elevation
         background = materialBg
         binding.btnResultUp.isEnabled = true
+    }
+
+    override fun onSaveInstanceState(): Parcelable? {
+        val savedState = SavedState(super.onSaveInstanceState())
+        savedState.ssIsSearchMode = isSearchMode
+
+        return savedState
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        super.onRestoreInstanceState(state)
+        if (state is SavedState){
+            isSearchMode = state.ssIsSearchMode
+            binding.reveal.isVisible = isSearchMode
+            binding.bottomGroup.isVisible = isSearchMode
+        }
     }
 
     override fun getBehavior(): CoordinatorLayout.Behavior<*> {
@@ -84,6 +102,29 @@ class Bottombar @JvmOverloads constructor(
                 0 -> btnResultUp.isEnabled = false
                 searchCount.dec() -> btnResultDown.isEnabled = false
             }
+        }
+    }
+
+    private class SavedState:BaseSavedState, Parcelable{
+        var ssIsSearchMode: Boolean = false
+        constructor(superState: Parcelable?):super(superState)
+        constructor(parcel: Parcel) : super(parcel){
+            ssIsSearchMode = parcel.readByte() != 0.toByte()
+        }
+
+        override fun describeContents(): Int {
+            return 0
+        }
+
+        override fun writeToParcel(out: Parcel, flags: Int) {
+            super.writeToParcel(out, flags)
+            out.writeByte(if (ssIsSearchMode) 1 else 0)
+        }
+
+        companion object CREATOR:Parcelable.Creator<SavedState>{
+            override fun createFromParcel(source: Parcel): SavedState = SavedState(source)
+            override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
+
         }
     }
 }

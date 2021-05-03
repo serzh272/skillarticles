@@ -7,7 +7,7 @@ import ru.skillbranch.skillarticles.viewmodels.SubmenuData
 interface IArticleView {
     fun setupSubmenu()
     fun setupBottomBar()
-    fun renderBottomBar(data: BottombarData)
+    fun renderBotombar(data: BottombarData)
     fun renderSubmenu(data: SubmenuData)
     fun renderUi(data: ArticleState)
     fun setupToolbar()
