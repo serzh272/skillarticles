@@ -33,7 +33,6 @@ class RootActivity : AppCompatActivity(), IArticleView {
     private val vb: ActivityRootBinding by viewBinding(ActivityRootBinding::inflate)
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var viewModelFactory: ViewModelProvider.Factory = ViewModelFactory(this, "0")
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     private val viewModel: ArticleViewModel by viewModels { ViewModelFactory(this, "0") }
     private val vbBottomBar
         get() = vb.bottombar.binding

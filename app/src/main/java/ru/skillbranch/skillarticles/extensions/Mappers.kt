@@ -2,6 +2,7 @@ package ru.skillbranch.skillarticles.extensions
 
 import ru.skillbranch.skillarticles.data.AppSettings
 import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
+import ru.skillbranch.skillarticles.data.local.User
 import ru.skillbranch.skillarticles.viewmodels.ArticleState
 
 fun ArticleState.toAppSettings(): AppSettings{
@@ -34,4 +35,13 @@ fun ArticleState.asMap():Map<String, Any?> = mapOf(
     "poster" to poster,
     "content" to content,
     "reviews" to reviews
+)
+
+fun User.asMap(): Map<String, Any?> = mapOf(
+    "id"  to id,
+    "name"  to name,
+    "avatar"  to avatar,
+    "rating"  to rating,
+    "respect"  to respect,
+    "about"  to about
 )
