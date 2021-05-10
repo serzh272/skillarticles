@@ -28,12 +28,14 @@ import ru.skillbranch.skillarticles.ui.custom.SearchSpan
 import ru.skillbranch.skillarticles.ui.delegates.AttrValue
 import ru.skillbranch.skillarticles.ui.delegates.viewBinding
 import ru.skillbranch.skillarticles.viewmodels.*
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 class RootActivity : AppCompatActivity(), IArticleView {
     private val vb: ActivityRootBinding by viewBinding(ActivityRootBinding::inflate)
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var viewModelFactory: ViewModelProvider.Factory = ViewModelFactory(this, "0")
-    private val viewModel: ArticleViewModel by viewModels { ViewModelFactory(this, "0") }
+    private val viewModel: ArticleViewModel by viewModels { viewModelFactory }
     private val vbBottomBar
         get() = vb.bottombar.binding
     private val vbSubmenu
@@ -143,7 +145,6 @@ class RootActivity : AppCompatActivity(), IArticleView {
     }
 
     override fun renderUi(data: ArticleState) {
-
         delegate.localNightMode =
             if (data.isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
             else AppCompatDelegate.MODE_NIGHT_NO

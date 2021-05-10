@@ -13,10 +13,10 @@ import ru.skillbranch.skillarticles.data.adapters.JsonAdapter
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-class PrefObjDelegate<T> (private val adapter: JsonAdapter<T>, private val customKey:String? = null):ReadWriteProperty<PrefManager, T> {
+class PrefObjDelegate<T> (private val adapter: JsonAdapter<T>, private val customKey:String? = null):ReadWriteProperty<PrefManager, T?> {
 
     var _storedValue: String? = null
-    override fun setValue(thisRef: PrefManager, property: KProperty<*>, value: T) {
+    override fun setValue(thisRef: PrefManager, property: KProperty<*>, value: T?) {
         val key = stringPreferencesKey(customKey ?: property.name)
         _storedValue = adapter.toJson(value)
         thisRef.scope.launch {
@@ -26,7 +26,7 @@ class PrefObjDelegate<T> (private val adapter: JsonAdapter<T>, private val custo
         }
     }
 
-    override fun getValue(thisRef: PrefManager, property: KProperty<*>): T {
+    override fun getValue(thisRef: PrefManager, property: KProperty<*>): T? {
         val key = stringPreferencesKey(customKey ?: property.name)
         if (_storedValue == null){
             val flowValue = thisRef.dataStore.data
@@ -35,6 +35,6 @@ class PrefObjDelegate<T> (private val adapter: JsonAdapter<T>, private val custo
                 }
             _storedValue = runBlocking(Dispatchers.IO) { flowValue.first() }
         }
-        return adapter.fromJson(_storedValue!!)!!
+        return adapter.fromJson(_storedValue ?: "")
     }
 }
