@@ -12,13 +12,14 @@ import ru.skillbranch.skillarticles.extensions.asMap
 import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.extensions.indexesOf
 
-class ArticleViewModel(private val articleId: String, savedStateHandle: SavedStateHandle) : BaseViewModel<ArticleState>(ArticleState(), savedStateHandle),
+class ArticleViewModel(private val articleId: String, savedStateHandle: SavedStateHandle) :
+    BaseViewModel<ArticleState>(ArticleState(), savedStateHandle),
     IArticleViewModel {
     private val repository = ArticleRepository
 
     init {
 
-        savedStateHandle.setSavedStateProvider("state"){
+        savedStateHandle.setSavedStateProvider("state") {
             currentState.toBundle()
         }
         subscribeOnDataSource(getArticleData()) { article, state ->
@@ -160,7 +161,7 @@ data class ArticleState(
     val poster: String? = null, //обложка статьи
     val content: List<String> = emptyList(), //контент
     val reviews: List<Any> = emptyList() //комментарии
-): VMState {
+) : VMState {
     override fun toBundle(): Bundle {
         val map = copy(content = emptyList(), isLoadingContent = true)
             .asMap()
@@ -173,26 +174,26 @@ data class ArticleState(
         val map = bundle.keySet().associateWith { bundle[it] }
         return copy(
             isAuth = map["isAuth"] as Boolean,
-                    isLoadingContent = map["isLoadingContent"] as Boolean,
-                    isLoadingReviews = map["isLoadingReviews"] as Boolean,
-                    isLike = map["isLike"] as Boolean,
-                    isBookmark = map["isBookmark"] as Boolean,
-                    isShowMenu = map["isShowMenu"] as Boolean,
-                    isBigText = map["isBigText"] as Boolean,
-                    isDarkMode = map["isDarkMode"] as Boolean,
-                    isSearch = map["isSearch"] as Boolean,
-                    searchQuery = map["searchQuery"] as String?,
-                    searchResults = map["searchResults"] as List<Pair<Int, Int>>,
-                    searchPosition = map["searchPosition"] as Int,
-                    shareLink = map["shareLink"] as String,
-                    title = map["title"] as String,
-                    category = map["category"] as String,
-                    categoryIcon = map["categoryIcon"] as Any,
-                    date = map["date"] as String,
-                    author = map["author"] as Any,
-                    poster = map["poster"] as String,
-                    content = map["content"] as List<String>,
-                    reviews = map["reviews"] as List<Any>
+            isLoadingContent = map["isLoadingContent"] as Boolean,
+            isLoadingReviews = map["isLoadingReviews"] as Boolean,
+            isLike = map["isLike"] as Boolean,
+            isBookmark = map["isBookmark"] as Boolean,
+            isShowMenu = map["isShowMenu"] as Boolean,
+            isBigText = map["isBigText"] as Boolean,
+            isDarkMode = map["isDarkMode"] as Boolean,
+            isSearch = map["isSearch"] as Boolean,
+            searchQuery = map["searchQuery"] as String?,
+            searchResults = map["searchResults"] as List<Pair<Int, Int>>,
+            searchPosition = map["searchPosition"] as Int,
+            shareLink = map["shareLink"] as String,
+            title = map["title"] as String,
+            category = map["category"] as String,
+            categoryIcon = map["categoryIcon"] as Any,
+            date = map["date"] as String,
+            author = map["author"] as Any,
+            poster = map["poster"] as String,
+            content = map["content"] as List<String>,
+            reviews = map["reviews"] as List<Any>
         )
     }
 }
@@ -217,8 +218,8 @@ fun ArticleState.toBottombarData() =
 
 fun ArticleState.toSubmenuData() = SubmenuData(isShowMenu, isBigText, isDarkMode)
 
-fun ArticleState.toAppSettings() : AppSettings {
-    return AppSettings(isDarkMode,isBigText)
+fun ArticleState.toAppSettings(): AppSettings {
+    return AppSettings(isDarkMode, isBigText)
 }
 
 fun ArticleState.toArticlePersonalInfo(): ArticlePersonalInfo {
