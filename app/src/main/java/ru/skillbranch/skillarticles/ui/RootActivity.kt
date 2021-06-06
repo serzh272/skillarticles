@@ -5,6 +5,7 @@ import android.os.PersistableBundle
 import android.text.Selection
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.method.LinkMovementMethod
 import android.text.method.ScrollingMovementMethod
 import android.view.Menu
 import android.view.MenuItem
@@ -16,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.text.getSpans
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
@@ -23,6 +25,7 @@ import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.databinding.ActivityRootBinding
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.setMarginOptionally
+import ru.skillbranch.skillarticles.markdown.MarkdownBuilder
 import ru.skillbranch.skillarticles.ui.custom.SearchFocusSpan
 import ru.skillbranch.skillarticles.ui.custom.SearchSpan
 import ru.skillbranch.skillarticles.ui.delegates.AttrValue
@@ -150,16 +153,16 @@ class RootActivity : AppCompatActivity(), IArticleView {
             else AppCompatDelegate.MODE_NIGHT_NO
         with(vb.tvTextContent){
             textSize = if(data.isBigText) 18f else 14f
-            movementMethod = ScrollingMovementMethod()
-            val content = if(data.isLoadingContent) "loading" else data.content.first()
-            if (text.toString() == content) return@with
-            setText(content, TextView.BufferType.SPANNABLE)
+            movementMethod = LinkMovementMethod()
+            MarkdownBuilder(context)
+                .markdownToSpan(data.content)
+                .run { setText(this, TextView.BufferType.SPANNABLE) }
         }
 
         with(vb.toolbar){
             title = data.title ?: "loading"
             subtitle = data.category ?: "loading"
-            if (data.categoryIcon != null) logo = getDrawable(data.categoryIcon as Int)
+            if (data.categoryIcon != null) logo = ContextCompat.getDrawable(context, data.categoryIcon as Int)
         }
 
         if (data.isLoadingContent) return
