@@ -30,7 +30,7 @@ class MarkdownBuilder(context: Context) {
     private val headerMarginBottom = context.dpToPx(8)
     private val ruleWidth = context.dpToPx(2)
     private val linkIcon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_link_24)!!
-    fun markdownToSpan(string: String) : SpannedString{
+    fun markdownToSpan(string: String): SpannedString {
         val markdown = MarkdownParser.parse(string)
         return buildSpannedString {
             markdown.elements.forEach { buildElement(it, this) }
@@ -39,11 +39,11 @@ class MarkdownBuilder(context: Context) {
 
     private fun buildElement(element: Element, builder: SpannableStringBuilder): CharSequence {
         return builder.apply {
-            when (element){
+            when (element) {
                 is Element.Text -> append(element.text)
                 is Element.UnorderedListItem -> {
-                    inSpans(UnorderedListSpan(gap, bulletRadius, colorSecondary)){
-                        for (child in element.elements){
+                    inSpans(UnorderedListSpan(gap, bulletRadius, colorSecondary)) {
+                        for (child in element.elements) {
                             buildElement(child, builder)
                         }
                     }
@@ -51,51 +51,74 @@ class MarkdownBuilder(context: Context) {
                 is Element.Quote -> {
                     inSpans(
                         BlockquotesSpan(gap, quoteWidth, colorSecondary),
-                    StyleSpan(Typeface.ITALIC)){
-                        for (child in element.elements){
+                        StyleSpan(Typeface.ITALIC)
+                    ) {
+                        for (child in element.elements) {
                             buildElement(child, builder)
                         }
                     }
                 }
                 is Element.Header -> {
-                    inSpans(HeaderSpan(element.level, colorPrimary, colorDivider, headerMarginTop, headerMarginBottom)){
+                    inSpans(
+                        HeaderSpan(
+                            element.level,
+                            colorPrimary,
+                            colorDivider,
+                            headerMarginTop,
+                            headerMarginBottom
+                        )
+                    ) {
                         append(element.text)
                     }
                 }
-                is Element.Bold ->{
-                    inSpans(StyleSpan(Typeface.BOLD)){
-                        for (child in element.elements){
+                is Element.Bold -> {
+                    inSpans(StyleSpan(Typeface.BOLD)) {
+                        for (child in element.elements) {
                             buildElement(child, builder)
                         }
                     }
                 }
-                is Element.Italic ->{
-                    inSpans(StyleSpan(Typeface.ITALIC)){
-                        for (child in element.elements){
+                is Element.Italic -> {
+                    inSpans(StyleSpan(Typeface.ITALIC)) {
+                        for (child in element.elements) {
                             buildElement(child, builder)
                         }
                     }
                 }
-                is Element.Strike ->{
-                    inSpans(StrikethroughSpan()){
-                        for (child in element.elements){
+                is Element.Strike -> {
+                    inSpans(StrikethroughSpan()) {
+                        for (child in element.elements) {
                             buildElement(child, builder)
                         }
                     }
                 }
-                is Element.Rule ->{
-                    inSpans(HorizontalRuleSpan(ruleWidth, colorDivider)){
+                is Element.Rule -> {
+                    inSpans(HorizontalRuleSpan(ruleWidth, colorDivider)) {
                         append(element.text)
                     }
                 }
-                is Element.InlineCode ->{
-                    inSpans(InlineCodeSpan(colorOnSurface, opacityColorSurface,cornerRadius, gap)){
+                is Element.InlineCode -> {
+                    inSpans(
+                        InlineCodeSpan(
+                            colorOnSurface,
+                            opacityColorSurface,
+                            cornerRadius,
+                            gap
+                        )
+                    ) {
                         append(element.text)
                     }
                 }
-                is Element.Link ->{
-                    inSpans(IconLinkSpan(linkIcon,gap,colorPrimary, strikeWidth),
-                    URLSpan(element.link)){
+                is Element.Link -> {
+                    inSpans(
+                        IconLinkSpan(linkIcon, gap, colorPrimary, strikeWidth),
+                        URLSpan(element.link)
+                    ) {
+                        append(element.text)
+                    }
+                }
+                is Element.OrderedListItem -> {
+                    inSpans(OrderedListSpan(gap, element.order, colorSecondary)) {
                         append(element.text)
                     }
                 }

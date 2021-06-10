@@ -144,8 +144,15 @@ and combined emphasis together ~~two tildes for strike and __underscores for inn
 - Use minuses for list item and _underscores_ and *asterisks* for emphasis aka *italic*
 + Or use plus for list item and ~~double tildes~~ for strike
 
-1. First ordered list item
-2. Second item
+1. First ordered list item 
+2. Second item 
+3. Third item.
+3. Third item.
+3. Third item.
+3. Third item.
+3. Third item.
+3. Third item.
+3. Third item.
 3. Third item.
 
 > Blockquotes are very handy in ~~email~~ to emulate reply text.
