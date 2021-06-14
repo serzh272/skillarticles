@@ -14,5 +14,6 @@
 /app/libs
 /app/src/test/
 /app/src/androidTest/
+/app/src/main/java/ru/skillbranch/skillarticles/markdown/spans/BlockCodeSpan.kt
 .externalNativeBuild
 .cxx
