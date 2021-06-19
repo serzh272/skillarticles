@@ -8,6 +8,7 @@ fun String?.indexesOf(substr:String, ignoreCase:Boolean = true): List<Int>{
     while (ind != -1){
         ind = this?.indexOf(substr, ind, ignoreCase)!!
         if (ind != -1) result.add(ind++)
+        else break
     }
     return result
 }
