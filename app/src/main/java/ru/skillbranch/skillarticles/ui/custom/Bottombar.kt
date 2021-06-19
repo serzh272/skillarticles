@@ -29,7 +29,6 @@ class Bottombar @JvmOverloads constructor(
         val materialBg = MaterialShapeDrawable.createWithElevationOverlay(context)
         materialBg.elevation = elevation
         background = materialBg
-        binding.btnResultUp.isEnabled = true
     }
 
     override fun onSaveInstanceState(): Parcelable? {
@@ -44,7 +43,7 @@ class Bottombar @JvmOverloads constructor(
         if (state is SavedState){
             isSearchMode = state.ssIsSearchMode
             binding.reveal.isVisible = isSearchMode
-            binding.bottomGroup.isVisible = isSearchMode
+            binding.bottomGroup.isVisible = !isSearchMode
         }
     }
 
