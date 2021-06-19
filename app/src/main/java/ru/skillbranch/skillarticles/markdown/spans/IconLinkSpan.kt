@@ -11,7 +11,7 @@ import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
 
 class IconLinkSpan(
-    private val linkDrawable: Drawable,
+    private var linkDrawable: Drawable,
     @Px val gap: Float,
     @ColorInt val textColor: Int,
     dotWidth: Float = 6f
@@ -33,7 +33,7 @@ class IconLinkSpan(
             iconSize = fm.descent - fm.ascent
         }
         if (iconSize!=0){
-            linkDrawable.setBounds(0,0,iconSize, iconSize)
+            linkDrawable.setBounds(0,0, iconSize, iconSize)
             textWidth = paint.measureText(text.toString(),start, end)
         }
         return (iconSize + gap + textWidth).toInt()
