@@ -31,7 +31,7 @@ class Bottombar @JvmOverloads constructor(
         background = materialBg
     }
 
-    override fun onSaveInstanceState(): Parcelable? {
+    override fun onSaveInstanceState(): Parcelable {
         val savedState = SavedState(super.onSaveInstanceState())
         savedState.ssIsSearchMode = isSearchMode
 

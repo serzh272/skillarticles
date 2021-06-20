@@ -50,7 +50,7 @@ class IconLinkSpan(
         bottom: Int,
         paint: Paint
     ) {
-        val textStart = x + iconSize +gap
+        val textStart = x + iconSize + gap
         paint.forLine {
             path.reset()
             path.moveTo(textStart, bottom.toFloat())
