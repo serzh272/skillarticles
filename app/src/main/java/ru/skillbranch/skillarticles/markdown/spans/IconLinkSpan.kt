@@ -63,7 +63,9 @@ class IconLinkSpan(
         linkDrawable.draw(canvas)
         canvas.restore()
         paint.forText {
-            canvas.drawText(text.toString(),start, end,textStart,y.toFloat(), paint)
+            if (text != null) {
+                canvas.drawText(text ,start, end,textStart,y.toFloat(), paint)
+            }
         }
     }
 

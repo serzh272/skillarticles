@@ -33,7 +33,7 @@ class UnderlineSpan(
             path.lineTo(x + textWidth, bottom.toFloat())
             canvas.drawPath(path, paint)
         }
-        canvas.drawText(text.toString(),start, end,x,y.toFloat(), paint)
+        canvas.drawText(text,start, end,x,y.toFloat(), paint)
     }
 
 
