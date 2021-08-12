@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.markdown.spans
+package ru.skillbranch.skillarticles.ui.custom.spans
 
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -6,6 +6,7 @@ import android.text.Layout
 import android.text.style.LeadingMarginSpan
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
+import ru.skillbranch.skillarticles.extensions.getLineBottomWithoutPadding
 
 class UnorderedListSpan(
     @Px
@@ -36,7 +37,10 @@ class UnorderedListSpan(
     ) {
         if (first){
             p?.withCustomColor {
-                c?.drawCircle(gapWidth + x + bulletRadius, (bottom + top)/2f, bulletRadius, p!!)
+                c?.drawCircle(gapWidth + x + bulletRadius,
+                    (top + layout?.getLineBottomWithoutPadding(layout.getLineForOffset(start))!!)/2f,
+                    bulletRadius,
+                    p)
             }
         }
     }
