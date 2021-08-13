@@ -46,7 +46,7 @@ class ArticleSubmenu @JvmOverloads constructor(
     val switchMode: SwitchMaterial
     val tvLabel: TextView
 
-    var isOpen = true
+    var isOpen = false
 
     private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = lineColor

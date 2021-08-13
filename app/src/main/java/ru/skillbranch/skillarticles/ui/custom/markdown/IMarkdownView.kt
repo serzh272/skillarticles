@@ -1,10 +1,10 @@
-package ru.skillbranch.skillarticles.markdown
+package ru.skillbranch.skillarticles.ui.custom.markdown
 
 import android.text.Spannable
 import android.text.SpannableString
 import androidx.core.text.getSpans
-import ru.skillbranch.skillarticles.markdown.spans.SearchFocusSpan
-import ru.skillbranch.skillarticles.markdown.spans.SearchSpan
+import ru.skillbranch.skillarticles.ui.custom.spans.SearchFocusSpan
+import ru.skillbranch.skillarticles.ui.custom.spans.SearchSpan
 
 interface IMarkdownView {
     var fontSize: Float

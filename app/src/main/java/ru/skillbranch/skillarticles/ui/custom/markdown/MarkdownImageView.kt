@@ -1,8 +1,10 @@
-package ru.skillbranch.skillarticles.markdown
+package ru.skillbranch.skillarticles.ui.custom.markdown
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
+import android.os.Parcel
+import android.os.Parcelable
 import android.text.Spannable
 import android.view.*
 import android.widget.ImageView
@@ -222,6 +224,40 @@ class MarkdownImageView private constructor(
         va.doOnEnd { tvAlt?.isVisible = false }
         va.start()
     }
+
+    override fun onSaveInstanceState(): Parcelable? {
+        val savedState = SavedState(super.onSaveInstanceState())
+        savedState.ssIsOpen = tvAlt?.isVisible ?: false
+        return savedState
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        super.onRestoreInstanceState(state)
+        if (state is SavedState){
+            tvAlt?.isVisible = state.ssIsOpen
+        }
+    }
+    private class SavedState: BaseSavedState, Parcelable {
+        var ssIsOpen: Boolean = false
+        constructor(superState: Parcelable?): super(superState)
+
+        constructor(src: Parcel): super(src){
+            ssIsOpen = src.readInt() == 1
+        }
+        override fun writeToParcel(dst: Parcel, flags: Int) {
+            super.writeToParcel(dst, flags)
+            dst.writeInt(if (ssIsOpen) 1 else 0)
+        }
+
+        override fun describeContents() = 0
+
+        companion object CREATOR : Parcelable.Creator<SavedState> {
+            override fun createFromParcel(parcel: Parcel) = SavedState(parcel)
+            override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
+        }
+    }
+
+
 }
 
 class AspectRatioResizeTransform : BitmapTransformation() {
@@ -250,4 +286,6 @@ class AspectRatioResizeTransform : BitmapTransformation() {
     override fun equals(other: Any?): Boolean = other is AspectRatioResizeTransform
 
     override fun hashCode(): Int = ID.hashCode()
+
+
 }
