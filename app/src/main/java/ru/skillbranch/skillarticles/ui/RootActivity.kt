@@ -5,15 +5,9 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.text.Selection
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.method.LinkMovementMethod
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -21,7 +15,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.core.text.getSpans
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.snackbar.Snackbar
@@ -30,11 +23,6 @@ import ru.skillbranch.skillarticles.databinding.ActivityRootBinding
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.hideKeyboard
 import ru.skillbranch.skillarticles.extensions.setMarginOptionally
-import ru.skillbranch.skillarticles.ui.custom.Bottombar
-import ru.skillbranch.skillarticles.ui.custom.markdown.MarkdownBuilder
-import ru.skillbranch.skillarticles.ui.custom.spans.SearchFocusSpan
-import ru.skillbranch.skillarticles.ui.custom.spans.SearchSpan
-import ru.skillbranch.skillarticles.ui.delegates.AttrValue
 import ru.skillbranch.skillarticles.ui.delegates.viewBinding
 import ru.skillbranch.skillarticles.viewmodels.*
 

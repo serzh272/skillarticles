@@ -4,17 +4,15 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.map
 import ru.skillbranch.skillarticles.data.AppSettings
 import ru.skillbranch.skillarticles.data.ArticleData
 import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.repositories.ArticleRepository
-import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
+import ru.skillbranch.skillarticles.ui.custom.markdown.MarkdownElement
 import ru.skillbranch.skillarticles.extensions.asMap
 import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.extensions.indexesOf
-import ru.skillbranch.skillarticles.data.repositories.MarkdownParser
-import ru.skillbranch.skillarticles.data.repositories.clearContent
+import ru.skillbranch.skillarticles.ui.custom.markdown.clearContent
 
 class ArticleViewModel(private val articleId: String, savedStateHandle: SavedStateHandle) :
     BaseViewModel<ArticleState>(ArticleState(), savedStateHandle),

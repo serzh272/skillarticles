@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.ui.custom.spans
+package ru.skillbranch.skillarticles.ui.custom.markdown.spans
 
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -7,7 +7,6 @@ import android.text.Spanned
 import android.text.style.LeadingMarginSpan
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
-import androidx.core.text.getSpans
 import ru.skillbranch.skillarticles.extensions.getLineBottomWithoutPadding
 
 class BlockquotesSpan(

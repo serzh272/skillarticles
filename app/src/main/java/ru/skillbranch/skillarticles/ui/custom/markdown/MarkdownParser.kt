@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.data.repositories
+package ru.skillbranch.skillarticles.ui.custom.markdown
 
 import java.lang.StringBuilder
 import java.util.regex.Pattern
@@ -355,7 +355,7 @@ fun List<MarkdownElement>.clearContent() :String{
     return  StringBuilder().apply {
         this@clearContent.forEach {
             when(it){
-                is MarkdownElement.Text -> it.elements.forEach{el -> append(el.clearContent())}
+                is MarkdownElement.Text -> it.elements.forEach{ el -> append(el.clearContent())}
                 is MarkdownElement.Image -> append(it.image.clearContent())
                 is MarkdownElement.Scroll -> append(it.blockCode.clearContent())
             }
