@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.ui.custom.markdown
+package ru.skillbranch.skillarticles.markdown
 
 import java.lang.StringBuilder
 import java.util.regex.Pattern

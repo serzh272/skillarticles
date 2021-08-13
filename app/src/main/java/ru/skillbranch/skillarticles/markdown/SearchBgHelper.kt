@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.ui.custom.markdown
+package ru.skillbranch.skillarticles.markdown
 
 import android.content.Context
 import android.content.res.ColorStateList
@@ -12,9 +12,9 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.text.getSpans
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.*
-import ru.skillbranch.skillarticles.ui.custom.markdown.spans.HeaderSpan
-import ru.skillbranch.skillarticles.ui.custom.markdown.spans.SearchFocusSpan
-import ru.skillbranch.skillarticles.ui.custom.markdown.spans.SearchSpan
+import ru.skillbranch.skillarticles.markdown.spans.HeaderSpan
+import ru.skillbranch.skillarticles.markdown.spans.SearchFocusSpan
+import ru.skillbranch.skillarticles.markdown.spans.SearchSpan
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 class SearchBgHelper(

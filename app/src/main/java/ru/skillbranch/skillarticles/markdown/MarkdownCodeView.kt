@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.ui.custom.markdown
+package ru.skillbranch.skillarticles.markdown
 
 import android.annotation.SuppressLint
 import android.content.Context
