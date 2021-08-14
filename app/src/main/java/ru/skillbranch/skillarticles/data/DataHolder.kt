@@ -164,6 +164,7 @@ Once we have the drawables we need to draw them. For that, we need to know:
 * The character offset where the background should start and end at.
 
 We created an abstract class `SearchBgRenderer` that knows how to compute the top and the bottom offset of the line, but exposes an abstract `draw` function:
+```abstract fun draw(canvas: Canvas,layout: Layout,startLine: Int,endLine: Int,startOffset: Int,endOffset: Int)```
 The `draw` function will have different implementations depending on whether our text spans a single line or multiple lines. Both of the implementations work on the same principle: based on the line top and bottom, set the bounds of the drawable and render it on the canvas.
 
 The single line implementation only needs to draw one drawable.
