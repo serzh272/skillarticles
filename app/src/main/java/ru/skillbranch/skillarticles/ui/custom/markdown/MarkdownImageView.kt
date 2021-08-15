@@ -6,6 +6,7 @@ import android.graphics.*
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.Spannable
+import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
@@ -36,11 +37,11 @@ class MarkdownImageView private constructor(
 ) : ViewGroup(context, null, 0), IMarkdownView {
 
     override var fontSize: Float = fontSize
-    set(value) {
-        tvTitle.textSize = value * 0.75f
-        tvAlt?.textSize = value
-        field = value
-    }
+        set(value) {
+            tvTitle.textSize = value * 0.75f
+            tvAlt?.textSize = value
+            field = value
+        }
     override val spannableContent: Spannable
         get() = tvTitle.text as Spannable
 
@@ -102,6 +103,8 @@ class MarkdownImageView private constructor(
             clipToOutline = true
         }
         addView(ivImage)
+        //if (ivImage.id == NO_ID) ivImage.id = View.generateViewId()
+
         tvTitle = MarkdownTextView(context, fontSize * 0.75f).apply {
             setText("title", TextView.BufferType.SPANNABLE)
             setTextColor(colorOnBackground)
@@ -110,6 +113,7 @@ class MarkdownImageView private constructor(
             setPaddingOptionally(start = titlePadding, end = titlePadding)
         }
         addView(tvTitle)
+        //if (tvTitle.id == NO_ID) tvTitle.id = View.generateViewId()
     }
 
     constructor(
@@ -139,10 +143,12 @@ class MarkdownImageView private constructor(
                 isVisible = false
             }
             addView(tvAlt)
+            //if (tvAlt!!.id == NO_ID)  tvAlt!!.id = View.generateViewId()
             ivImage.setOnClickListener {
                 if (tvAlt?.isVisible == true) animateHideAlt() else animateShowAlt()
             }
         }
+        Log.d("M_MarkdownImageView", "Setted ImageId=${ivImage.id}, TitleId=${tvTitle.id}, AltId=${tvAlt?.id}")
 
     }
 
@@ -227,26 +233,48 @@ class MarkdownImageView private constructor(
 
     override fun onSaveInstanceState(): Parcelable? {
         val savedState = SavedState(super.onSaveInstanceState())
+        if (ivImage.id == NO_ID)  ivImage.id = View.generateViewId()
+        if (tvTitle.id == NO_ID)  tvTitle.id = View.generateViewId()
+        if (tvAlt!!.id == NO_ID)  tvAlt!!.id = View.generateViewId()
         savedState.ssIsOpen = tvAlt?.isVisible ?: false
+        savedState.ssImageId = ivImage.id
+        savedState.ssTitleId = tvTitle.id
+        savedState.ssAltId = tvAlt?.id ?: 0
         return savedState
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         super.onRestoreInstanceState(state)
-        if (state is SavedState){
+        if (state is SavedState) {
             tvAlt?.isVisible = state.ssIsOpen
+            ivImage.id = state.ssImageId
+            tvTitle.id = state.ssTitleId
+            tvAlt?.id = state.ssAltId
+            Log.d("M_MarkdownImageView", "Restored ImageId=${ivImage.id}, TitleId=${tvTitle.id}, AltId=${tvAlt?.id}")
         }
     }
-    private class SavedState: BaseSavedState, Parcelable {
-        var ssIsOpen: Boolean = false
-        constructor(superState: Parcelable?): super(superState)
 
-        constructor(src: Parcel): super(src){
+    private class SavedState : BaseSavedState, Parcelable {
+        var ssIsOpen: Boolean = false
+        var ssImageId = 0
+        var ssTitleId = 0
+        var ssAltId = 0
+
+        constructor(superState: Parcelable?) : super(superState)
+
+        constructor(src: Parcel) : super(src) {
             ssIsOpen = src.readInt() == 1
+            ssImageId = src.readInt()
+            ssTitleId = src.readInt()
+            ssAltId = src.readInt()
         }
+
         override fun writeToParcel(dst: Parcel, flags: Int) {
             super.writeToParcel(dst, flags)
             dst.writeInt(if (ssIsOpen) 1 else 0)
+            dst.writeInt(ssImageId)
+            dst.writeInt(ssTitleId)
+            dst.writeInt(ssAltId)
         }
 
         override fun describeContents() = 0
@@ -279,8 +307,13 @@ class AspectRatioResizeTransform : BitmapTransformation() {
     ): Bitmap {
         val originWidth = toTransform.width
         val originHeight = toTransform.height
-        val aspectRatio = originWidth.toFloat()/originHeight
-        return Bitmap.createScaledBitmap(toTransform, outWidth, (outWidth/aspectRatio).toInt(),true)
+        val aspectRatio = originWidth.toFloat() / originHeight
+        return Bitmap.createScaledBitmap(
+            toTransform,
+            outWidth,
+            (outWidth / aspectRatio).toInt(),
+            true
+        )
     }
 
     override fun equals(other: Any?): Boolean = other is AspectRatioResizeTransform

@@ -92,6 +92,7 @@ class MarkdownContentView @JvmOverloads constructor(
                             tv.setText(this, TextView.BufferType.SPANNABLE)
                         }
                     addView(tv)
+                    layoutManager.attachToParent(tv, ind)
                 }
                 is MarkdownElement.Image -> {
                     val iv = MarkdownImageView(
@@ -167,7 +168,7 @@ class MarkdownContentView @JvmOverloads constructor(
     }
 
     override fun dispatchSaveInstanceState(container: SparseArray<Parcelable>?) {
-        children.forEachIndexed{ind, it ->
+        children.forEach{
             if (it !is MarkdownTextView) it.saveHierarchyState(layoutManager.container)
         }
         dispatchFreezeSelfOnly(container)
