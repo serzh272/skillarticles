@@ -103,7 +103,7 @@ class MarkdownCodeView private constructor(
     }
 
     init {
-        tvCodeView = MarkdownTextView(context, fontSize*0.85f).apply {
+        tvCodeView = MarkdownTextView(context, fontSize*0.85f,false).apply {
             typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
             setTextColor(textColor)
             setPaddingOptionally(end = textExtraPadding)

@@ -303,9 +303,9 @@ class Bottombar @JvmOverloads constructor(
             usedWidth += iconSize
             tvSearchResult.layout(
                 l + usedWidth,
-                iconSize / 2 - tvSearchResult.measuredHeight / 2,
+                (iconSize - tvSearchResult.measuredHeight) / 2,
                 l + usedWidth + tvSearchResult.measuredWidth,
-                iconSize / 2 + tvSearchResult.measuredHeight / 2
+                (iconSize + tvSearchResult.measuredHeight) / 2
             )
             btnResultDown.layout(
                 r - 2*iconSize,

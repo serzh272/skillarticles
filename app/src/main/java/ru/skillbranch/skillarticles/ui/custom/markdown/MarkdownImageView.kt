@@ -8,6 +8,7 @@ import android.os.Parcelable
 import android.text.Spannable
 import android.util.Log
 import android.view.*
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
@@ -34,7 +35,7 @@ import kotlin.math.hypot
 class MarkdownImageView private constructor(
     context: Context,
     fontSize: Float
-) : ViewGroup(context, null, 0), IMarkdownView {
+) : FrameLayout(context, null, 0), IMarkdownView {
 
     override var fontSize: Float = fontSize
         set(value) {
@@ -192,6 +193,7 @@ class MarkdownImageView private constructor(
             right,
             ivImage.measuredHeight
         )
+        super.onLayout(changed,l,t,r,b)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)

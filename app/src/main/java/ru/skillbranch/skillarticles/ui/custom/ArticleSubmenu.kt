@@ -23,6 +23,7 @@ import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.setPaddingOptionally
 import ru.skillbranch.skillarticles.ui.custom.behaviors.SubmenuBehavior
 import kotlin.math.hypot
+import kotlin.math.roundToInt
 
 class ArticleSubmenu @JvmOverloads constructor(
     context: Context,
@@ -33,7 +34,7 @@ class ArticleSubmenu @JvmOverloads constructor(
     @Px private val menuWidth = context.dpToIntPx(200)
     @Px private val menuHeight = context.dpToIntPx(96)
     @Px private val btnHeight = context.dpToIntPx(40)
-    @Px private val btnWidth = menuWidth / 2
+    @Px private val btnWidth = context.dpToIntPx(100)
     @Px private val defaultPadding = context.dpToIntPx(16)
     @ColorInt private var lineColor: Int = context.getColor(R.color.color_divider)
     @ColorInt private val textColor = context.attrValue(R.attr.colorOnSurface, true)
@@ -165,7 +166,7 @@ class ArticleSubmenu @JvmOverloads constructor(
             usedHeight + btnHeight
         )
         btnTextUp.layout(
-            btnWidth,
+            btnWidth + 1,
             usedHeight,
             menuWidth-paddingRight,
             usedHeight + btnHeight
@@ -173,16 +174,16 @@ class ArticleSubmenu @JvmOverloads constructor(
         usedHeight += btnHeight
         tvLabel.layout(
             context.dpToIntPx(16) + paddingLeft,
-            (menuHeight -paddingBottom + btnHeight)/2 - tvLabel.measuredHeight/2,
-            paddingLeft + context.dpToIntPx(16) + tvLabel.measuredWidth,
+            ((menuHeight -paddingBottom + btnHeight - tvLabel.measuredHeight)/2f+1).roundToInt(),
+            paddingLeft + context.dpToIntPx(16) + tvLabel.measuredWidth-5,
             (menuHeight -paddingBottom + btnHeight)/2 + tvLabel.measuredHeight/2
         )
 
         switchMode.layout(
             menuWidth - paddingRight - switchMode.measuredWidth - context.dpToIntPx(16),
-            (menuHeight -paddingBottom + btnHeight)/2 - switchMode.measuredHeight/2,
+            (menuHeight -paddingBottom + btnHeight - switchMode.measuredHeight)/2,
             menuWidth - paddingRight - context.dpToIntPx(16),
-            (menuHeight -paddingBottom + btnHeight)/2 + switchMode.measuredHeight/2
+            (menuHeight -paddingBottom + btnHeight + switchMode.measuredHeight)/2
         )
     }
 

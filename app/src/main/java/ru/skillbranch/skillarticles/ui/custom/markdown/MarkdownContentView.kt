@@ -44,7 +44,7 @@ class MarkdownContentView @JvmOverloads constructor(
             usedHeight += it.measuredHeight
         }
         usedHeight += paddingBottom
-        setMeasuredDimension(width, usedHeight)
+        setMeasuredDimension(width, 4512)
     }
 
 
