@@ -175,7 +175,7 @@ class ArticleSubmenu @JvmOverloads constructor(
         tvLabel.layout(
             context.dpToIntPx(16) + paddingLeft,
             ((menuHeight -paddingBottom + btnHeight - tvLabel.measuredHeight)/2f+1).roundToInt(),
-            paddingLeft + context.dpToIntPx(16) + tvLabel.measuredWidth-5,
+            paddingLeft + context.dpToIntPx(16) + tvLabel.measuredWidth,
             (menuHeight -paddingBottom + btnHeight)/2 + tvLabel.measuredHeight/2
         )
 
