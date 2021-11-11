@@ -250,7 +250,7 @@ class MultiLineRender(
         end: Int,
         bottom: Int
     ) {
-        drawableLeft.setBounds(start+2, top, end+129, bottom)
+        drawableLeft.setBounds(start, top, end, bottom)
         drawableLeft.draw(canvas)
     }
 

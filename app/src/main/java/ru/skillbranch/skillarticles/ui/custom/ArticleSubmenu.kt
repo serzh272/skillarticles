@@ -166,7 +166,7 @@ class ArticleSubmenu @JvmOverloads constructor(
             usedHeight + btnHeight
         )
         btnTextUp.layout(
-            btnWidth + 1,
+            btnWidth,
             usedHeight,
             menuWidth-paddingRight,
             usedHeight + btnHeight
@@ -174,14 +174,14 @@ class ArticleSubmenu @JvmOverloads constructor(
         usedHeight += btnHeight
         tvLabel.layout(
             context.dpToIntPx(16) + paddingLeft,
-            ((menuHeight -paddingBottom + btnHeight - tvLabel.measuredHeight)/2f+1).roundToInt(),
+            ((menuHeight -paddingBottom + btnHeight - tvLabel.measuredHeight)/2f).roundToInt(),
             paddingLeft + context.dpToIntPx(16) + tvLabel.measuredWidth,
             (menuHeight -paddingBottom + btnHeight)/2 + tvLabel.measuredHeight/2
         )
 
         switchMode.layout(
             menuWidth - paddingRight - switchMode.measuredWidth - context.dpToIntPx(16),
-            (menuHeight -paddingBottom + btnHeight - switchMode.measuredHeight)/2,
+            ((menuHeight -paddingBottom + btnHeight - switchMode.measuredHeight)/2f).roundToInt(),
             menuWidth - paddingRight - context.dpToIntPx(16),
             (menuHeight -paddingBottom + btnHeight + switchMode.measuredHeight)/2
         )
