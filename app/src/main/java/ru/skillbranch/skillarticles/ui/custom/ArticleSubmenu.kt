@@ -10,7 +10,10 @@ import android.view.View
 import android.view.ViewAnimationUtils
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.annotation.*
+import androidx.annotation.ColorInt
+import androidx.annotation.DrawableRes
+import androidx.annotation.Px
+import androidx.annotation.VisibleForTesting
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
@@ -29,17 +32,32 @@ class ArticleSubmenu @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ViewGroup(context, attrs, defStyleAttr) , CoordinatorLayout.AttachedBehavior {
+) : ViewGroup(context, attrs, defStyleAttr), CoordinatorLayout.AttachedBehavior {
     //settings
-    @Px private val menuWidth = context.dpToIntPx(200)
-    @Px private val menuHeight = context.dpToIntPx(96)
-    @Px private val btnHeight = context.dpToIntPx(40)
-    @Px private val btnWidth = context.dpToIntPx(100)
-    @Px private val defaultPadding = context.dpToIntPx(16)
-    @ColorInt private var lineColor: Int = context.getColor(R.color.color_divider)
-    @ColorInt private val textColor = context.attrValue(R.attr.colorOnSurface, true)
+    @Px
+    private val menuWidth = context.dpToIntPx(200)
+
+    @Px
+    private val menuHeight = context.dpToIntPx(96)
+
+    @Px
+    private val btnHeight = context.dpToIntPx(40)
+
+    @Px
+    private val btnWidth = context.dpToIntPx(100)
+
+    @Px
+    private val defaultPadding = context.dpToIntPx(16)
+
+    @ColorInt
+    private var lineColor: Int = context.getColor(R.color.color_divider)
+
+    @ColorInt
+    private val textColor = context.attrValue(R.attr.colorOnSurface, true)
     private val iconTint = context.getColorStateList(R.color.tint_color)
-    @DrawableRes private val bg = context.attrValue(R.attr.selectableItemBackground, needRes = true)
+
+    @DrawableRes
+    private val bg = context.attrValue(R.attr.selectableItemBackground, needRes = true)
 
     //views
     val btnTextDown: CheckableImageView
@@ -132,7 +150,7 @@ class ArticleSubmenu @JvmOverloads constructor(
     }
 
     //save state
-    override fun onSaveInstanceState(): Parcelable? {
+    override fun onSaveInstanceState(): Parcelable {
         val savedState = SavedState(super.onSaveInstanceState())
         savedState.ssIsOpen = isOpen
         return savedState
@@ -168,30 +186,42 @@ class ArticleSubmenu @JvmOverloads constructor(
         btnTextUp.layout(
             btnWidth,
             usedHeight,
-            menuWidth-paddingRight,
+            menuWidth - paddingRight,
             usedHeight + btnHeight
         )
         usedHeight += btnHeight
         tvLabel.layout(
             context.dpToIntPx(16) + paddingLeft,
-            ((menuHeight -paddingBottom + btnHeight - tvLabel.measuredHeight)/2f).roundToInt(),
+            ((menuHeight - paddingBottom + btnHeight - tvLabel.measuredHeight) / 2f).roundToInt(),
             paddingLeft + context.dpToIntPx(16) + tvLabel.measuredWidth,
-            (menuHeight -paddingBottom + btnHeight)/2 + tvLabel.measuredHeight/2
+            (menuHeight - paddingBottom + btnHeight) / 2 + tvLabel.measuredHeight / 2
         )
 
         switchMode.layout(
             menuWidth - paddingRight - switchMode.measuredWidth - context.dpToIntPx(16),
-            ((menuHeight -paddingBottom + btnHeight - switchMode.measuredHeight)/2f).roundToInt(),
+            ((menuHeight - paddingBottom + btnHeight - switchMode.measuredHeight) / 2f).roundToInt(),
             menuWidth - paddingRight - context.dpToIntPx(16),
-            (menuHeight -paddingBottom + btnHeight + switchMode.measuredHeight)/2
+            (menuHeight - paddingBottom + btnHeight + switchMode.measuredHeight) / 2
         )
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
-        canvas.drawLine(menuWidth/2f,0f,menuWidth/2f,paddingTop+btnHeight.toFloat(), linePaint)
-        canvas.drawLine(0f,paddingTop+btnHeight.toFloat(),menuWidth.toFloat(),paddingTop+btnHeight.toFloat(), linePaint)
+        canvas.drawLine(
+            menuWidth / 2f,
+            0f,
+            menuWidth / 2f,
+            paddingTop + btnHeight.toFloat(),
+            linePaint
+        )
+        canvas.drawLine(
+            0f,
+            paddingTop + btnHeight.toFloat(),
+            menuWidth.toFloat(),
+            paddingTop + btnHeight.toFloat(),
+            linePaint
+        )
 
     }
 
