@@ -7,7 +7,10 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.text.Spannable
 import android.util.Log
-import android.view.*
+import android.view.Gravity
+import android.view.View
+import android.view.ViewAnimationUtils
+import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -130,6 +133,7 @@ class MarkdownImageView private constructor(
             .with(context)
             .load(url)
             .transform(AspectRatioResizeTransform())
+            .placeholder(R.drawable.poster_placeholder)
             .into(ivImage)
 
         if (alt != null) {
@@ -192,7 +196,6 @@ class MarkdownImageView private constructor(
             right,
             ivImage.measuredHeight
         )
-        super.onLayout(changed,l,t,r,b)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
