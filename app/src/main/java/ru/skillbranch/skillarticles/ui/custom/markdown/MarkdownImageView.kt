@@ -17,6 +17,7 @@ import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
@@ -55,7 +56,7 @@ class MarkdownImageView private constructor(
     private lateinit var imageTitle: CharSequence
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    val ivImage: ImageView
+    val ivImage: AppCompatImageView
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val tvTitle: MarkdownTextView
@@ -92,8 +93,10 @@ class MarkdownImageView private constructor(
     }
 
     init {
-        layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-        ivImage = ImageView(context).apply {
+        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        ivImage = AppCompatImageView(context).apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            setImageResource(R.drawable.ic_launcher_background)
             outlineProvider = object : ViewOutlineProvider() {
                 override fun getOutline(view: View, outline: Outline) {
                     outline.setRoundRect(
@@ -131,6 +134,7 @@ class MarkdownImageView private constructor(
             .with(context)
             .load(url)
             .transform(AspectRatioResizeTransform())
+            .placeholder(R.drawable.ic_launcher_background)
             .into(ivImage)
 
         if (alt != null) {
@@ -194,7 +198,6 @@ class MarkdownImageView private constructor(
             right,
             ivImage.measuredHeight
         )
-        super.onLayout(changed,l,t,r,b)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
@@ -234,28 +237,28 @@ class MarkdownImageView private constructor(
         va.start()
     }
 
-    override fun onSaveInstanceState(): Parcelable? {
-        val savedState = SavedState(super.onSaveInstanceState())
-        if (ivImage.id == NO_ID)  ivImage.id = View.generateViewId()
-        if (tvTitle.id == NO_ID)  tvTitle.id = View.generateViewId()
-        if (tvAlt!!.id == NO_ID)  tvAlt!!.id = View.generateViewId()
-        savedState.ssIsOpen = tvAlt?.isVisible ?: false
-        savedState.ssImageId = ivImage.id
-        savedState.ssTitleId = tvTitle.id
-        savedState.ssAltId = tvAlt?.id ?: 0
-        return savedState
-    }
-
-    override fun onRestoreInstanceState(state: Parcelable?) {
-        super.onRestoreInstanceState(state)
-        if (state is SavedState) {
-            tvAlt?.isVisible = state.ssIsOpen
-            ivImage.id = state.ssImageId
-            tvTitle.id = state.ssTitleId
-            tvAlt?.id = state.ssAltId
-            Log.d("M_MarkdownImageView", "Restored ImageId=${ivImage.id}, TitleId=${tvTitle.id}, AltId=${tvAlt?.id}")
-        }
-    }
+//    override fun onSaveInstanceState(): Parcelable? {
+//        val savedState = SavedState(super.onSaveInstanceState())
+//        if (ivImage.id == NO_ID)  ivImage.id = View.generateViewId()
+//        if (tvTitle.id == NO_ID)  tvTitle.id = View.generateViewId()
+//        if (tvAlt!!.id == NO_ID)  tvAlt!!.id = View.generateViewId()
+//        savedState.ssIsOpen = tvAlt?.isVisible ?: false
+//        savedState.ssImageId = ivImage.id
+//        savedState.ssTitleId = tvTitle.id
+//        savedState.ssAltId = tvAlt?.id ?: 0
+//        return savedState
+//    }
+//
+//    override fun onRestoreInstanceState(state: Parcelable?) {
+//        super.onRestoreInstanceState(state)
+//        if (state is SavedState) {
+//            tvAlt?.isVisible = state.ssIsOpen
+//            ivImage.id = state.ssImageId
+//            tvTitle.id = state.ssTitleId
+//            tvAlt?.id = state.ssAltId
+//            Log.d("M_MarkdownImageView", "Restored ImageId=${ivImage.id}, TitleId=${tvTitle.id}, AltId=${tvAlt?.id}")
+//        }
+//    }
 
     private class SavedState : BaseSavedState, Parcelable {
         var ssIsOpen: Boolean = false
