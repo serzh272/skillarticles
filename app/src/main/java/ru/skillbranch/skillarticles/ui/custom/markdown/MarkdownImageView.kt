@@ -237,28 +237,31 @@ class MarkdownImageView private constructor(
         va.start()
     }
 
-//    override fun onSaveInstanceState(): Parcelable? {
-//        val savedState = SavedState(super.onSaveInstanceState())
-//        if (ivImage.id == NO_ID)  ivImage.id = View.generateViewId()
-//        if (tvTitle.id == NO_ID)  tvTitle.id = View.generateViewId()
-//        if (tvAlt!!.id == NO_ID)  tvAlt!!.id = View.generateViewId()
-//        savedState.ssIsOpen = tvAlt?.isVisible ?: false
-//        savedState.ssImageId = ivImage.id
-//        savedState.ssTitleId = tvTitle.id
-//        savedState.ssAltId = tvAlt?.id ?: 0
-//        return savedState
-//    }
-//
-//    override fun onRestoreInstanceState(state: Parcelable?) {
-//        super.onRestoreInstanceState(state)
-//        if (state is SavedState) {
-//            tvAlt?.isVisible = state.ssIsOpen
-//            ivImage.id = state.ssImageId
-//            tvTitle.id = state.ssTitleId
-//            tvAlt?.id = state.ssAltId
-//            Log.d("M_MarkdownImageView", "Restored ImageId=${ivImage.id}, TitleId=${tvTitle.id}, AltId=${tvAlt?.id}")
-//        }
-//    }
+    override fun onSaveInstanceState(): Parcelable? {
+        val savedState = SavedState(super.onSaveInstanceState())
+        if (ivImage.id == NO_ID) ivImage.id = View.generateViewId()
+        if (tvTitle.id == NO_ID) tvTitle.id = View.generateViewId()
+        if (tvAlt!!.id == NO_ID) tvAlt!!.id = View.generateViewId()
+        savedState.ssIsOpen = tvAlt?.isVisible ?: false
+        savedState.ssImageId = ivImage.id
+        savedState.ssTitleId = tvTitle.id
+        savedState.ssAltId = tvAlt?.id ?: 0
+        return savedState
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        super.onRestoreInstanceState(state)
+        if (state is SavedState) {
+            tvAlt?.isVisible = state.ssIsOpen
+            ivImage.id = state.ssImageId
+            tvTitle.id = state.ssTitleId
+            tvAlt?.id = state.ssAltId
+            Log.d(
+                "M_MarkdownImageView",
+                "Restored ImageId=${ivImage.id}, TitleId=${tvTitle.id}, AltId=${tvAlt?.id}"
+            )
+        }
+    }
 
     private class SavedState : BaseSavedState, Parcelable {
         var ssIsOpen: Boolean = false
