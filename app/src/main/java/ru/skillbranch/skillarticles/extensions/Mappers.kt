@@ -3,7 +3,7 @@ package ru.skillbranch.skillarticles.extensions
 import ru.skillbranch.skillarticles.data.AppSettings
 import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.local.User
-import ru.skillbranch.skillarticles.viewmodels.ArticleState
+import ru.skillbranch.skillarticles.viewmodels.article.ArticleState
 
 fun ArticleState.toAppSettings(): AppSettings{
     return AppSettings(isDarkMode, isBigText)
@@ -45,13 +45,3 @@ fun User.asMap(): Map<String, Any?> = mapOf(
     "respect"  to respect,
     "about"  to about
 )
-
-fun List<Pair<Int, Int>>.groupByBounds(bounds: List<Pair<Int, Int>>): List<MutableList<Pair<Int, Int>>> {
-    return bounds.fold(mutableListOf<MutableList<Pair<Int, Int>>>()){acc, pair ->
-        val res = this.filter {
-            it.first >= pair.first && it.second <= pair.second
-        }.toMutableList()
-        acc.add(res)
-        acc
-    }
-}

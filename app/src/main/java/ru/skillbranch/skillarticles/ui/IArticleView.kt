@@ -1,13 +1,13 @@
 package ru.skillbranch.skillarticles.ui
 
-import ru.skillbranch.skillarticles.viewmodels.ArticleState
-import ru.skillbranch.skillarticles.viewmodels.BottombarData
-import ru.skillbranch.skillarticles.viewmodels.SubmenuData
+import ru.skillbranch.skillarticles.viewmodels.article.ArticleState
+import ru.skillbranch.skillarticles.viewmodels.article.BottombarData
+import ru.skillbranch.skillarticles.viewmodels.article.SubmenuData
 
 interface IArticleView {
     fun setupSubmenu()
     fun setupBottomBar()
-    fun renderBotombar(data: BottombarData)
+    fun renderBottombar(data: BottombarData)
     fun renderSubmenu(data: SubmenuData)
     fun renderUi(data: ArticleState)
     fun setupToolbar()

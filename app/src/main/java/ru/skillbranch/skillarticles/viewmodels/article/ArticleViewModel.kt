@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.viewmodels
+package ru.skillbranch.skillarticles.viewmodels.article
 
 import android.os.Bundle
 import androidx.core.os.bundleOf
@@ -9,15 +9,24 @@ import ru.skillbranch.skillarticles.data.ArticleData
 import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.repositories.ArticleRepository
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
+import ru.skillbranch.skillarticles.data.repositories.clearContent
 import ru.skillbranch.skillarticles.extensions.asMap
 import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.extensions.indexesOf
-import ru.skillbranch.skillarticles.data.repositories.clearContent
+import ru.skillbranch.skillarticles.ui.article.ArticleFragmentArgs
+import ru.skillbranch.skillarticles.viewmodels.BaseViewModel
+import ru.skillbranch.skillarticles.viewmodels.IArticleViewModel
+import ru.skillbranch.skillarticles.viewmodels.Notify
+import ru.skillbranch.skillarticles.viewmodels.VMState
 
-class ArticleViewModel(private val articleId: String, savedStateHandle: SavedStateHandle) :
+class ArticleViewModel(savedStateHandle: SavedStateHandle) :
     BaseViewModel<ArticleState>(ArticleState(), savedStateHandle),
     IArticleViewModel {
     private val repository = ArticleRepository
+
+    private val args: ArticleFragmentArgs =
+        ArticleFragmentArgs.fromSavedStateHandle(savedStateHandle)
+    private val articleId = args.articleId
     private var clearContent: String? = null
 
     init {
@@ -132,7 +141,8 @@ class ArticleViewModel(private val articleId: String, savedStateHandle: SavedSta
 
     override fun handleSearch(query: String?) {
         query ?: return
-        if (clearContent == null && currentState.content.isNotEmpty()) clearContent = currentState.content.clearContent()
+        if (clearContent == null && currentState.content.isNotEmpty()) clearContent =
+            currentState.content.clearContent()
         val result = clearContent.indexesOf(query)
             .map { it to it + query.length }
         updateState { it.copy(searchQuery = query, searchResults = result) }
@@ -173,7 +183,8 @@ data class ArticleState(
     val author: Any? = null, //автор статьи
     val poster: String? = null, //обложка статьи
     val content: List<MarkdownElement> = emptyList(), //контент
-    val reviews: List<Any> = emptyList() //комментарии
+    val reviews: List<Any> = emptyList(), //комментарии
+    val message: String? = null
 ) : VMState {
     override fun toBundle(): Bundle {
         val map = copy(content = emptyList(), isLoadingContent = true)
@@ -206,7 +217,8 @@ data class ArticleState(
             author = map["author"] as Any,
             poster = map["poster"] as String,
             content = map["content"] as List<MarkdownElement>,
-            reviews = map["reviews"] as List<Any>
+            reviews = map["reviews"] as List<Any>,
+            message = map["message"] as String?
         )
     }
 }

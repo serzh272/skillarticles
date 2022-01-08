@@ -1,16 +1,22 @@
 package ru.skillbranch.skillarticles.viewmodels
 
 import android.os.Bundle
+import androidx.annotation.IdRes
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import androidx.lifecycle.*
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.navigation.NavDirections
+import androidx.navigation.NavOptions
+import androidx.navigation.Navigator
 import java.io.Serializable
 
-abstract class BaseViewModel<T>(initState: T, private val savedStateHandle: SavedStateHandle) : ViewModel() where T : VMState {
+abstract class BaseViewModel<T>(initState: T, private val savedStateHandle: SavedStateHandle) :
+    ViewModel() where T : VMState {
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     val notifications = MutableLiveData<Event<Notify>>()
+
+    val navigation = MutableLiveData<Event<NavCommand>>()
 
     /***
      * Инициализация начального состояния аргументом конструктоа, и объявления состояния как
@@ -67,7 +73,11 @@ abstract class BaseViewModel<T>(initState: T, private val savedStateHandle: Save
      * вспомогательная функция, позволяющая наблюдать за изменениями части стейта ViewModel
      * выражение обрабатывающее изменение текущего стостояния
      */
-    fun <D> observeSubState(owner: LifecycleOwner, transform:(T) ->  D, onChanged: (subState: D) -> Unit) {
+    fun <D> observeSubState(
+        owner: LifecycleOwner,
+        transform: (T) -> D,
+        onChanged: (subState: D) -> Unit
+    ) {
         state
             .map(transform)
             .distinctUntilChanged()
@@ -81,6 +91,15 @@ abstract class BaseViewModel<T>(initState: T, private val savedStateHandle: Save
      */
     fun observeNotifications(owner: LifecycleOwner, onNotify: (notification: Notify) -> Unit) {
         notifications.observe(owner, EventObserver { onNotify(it) })
+    }
+
+    fun observeNavigation(owner: LifecycleOwner, onNavigate: (navCommands: NavCommand) -> Unit) {
+        navigation.observe(owner, EventObserver { onNavigate(it) })
+    }
+
+    @UiThread
+    protected fun navigate(cmd: NavCommand) {
+        navigation.value = Event(cmd)
     }
 
     /***
@@ -97,7 +116,7 @@ abstract class BaseViewModel<T>(initState: T, private val savedStateHandle: Save
         }
     }
 
-    fun saveState(){
+    fun saveState() {
         savedStateHandle.set("state", currentState)
     }
 
@@ -108,21 +127,13 @@ abstract class BaseViewModel<T>(initState: T, private val savedStateHandle: Save
 //    }
 }
 
-public interface VMState:Serializable {
-    fun toBundle() : Bundle
-    fun fromBundle(bundle:Bundle): VMState?
-}
+public interface VMState : Serializable {
+    open fun toBundle(): Bundle {
+        return bundleOf()
+    }
 
-class ViewModelFactory(owner: SavedStateRegistryOwner, val params: String) : AbstractSavedStateViewModelFactory(owner, bundleOf()) {
-    override fun <T : ViewModel?> create(
-        key: String,
-        modelClass: Class<T>,
-        handle: SavedStateHandle
-    ): T {
-        if (modelClass.isAssignableFrom(ArticleViewModel::class.java)) {
-            return ArticleViewModel(params, handle) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
+    open fun fromBundle(bundle: Bundle): VMState? {
+        return null
     }
 }
 
@@ -172,4 +183,20 @@ sealed class Notify(val message: String) {
         val errLabel: String?,
         val errHandler: (() -> Unit)?
     ) : Notify(msg)
+}
+
+sealed class NavCommand {
+    data class Builder(
+        @IdRes val destination: Int,
+        val args: Bundle? = null,
+        val options: NavOptions? = null,
+        val extras: Navigator.Extras? = null
+    ) : NavCommand()
+
+    data class Action(val action: NavDirections) : NavCommand()
+
+    data class TopLevel(
+        @IdRes val destination: Int,
+        val options: NavOptions? = null
+    ) : NavCommand()
 }

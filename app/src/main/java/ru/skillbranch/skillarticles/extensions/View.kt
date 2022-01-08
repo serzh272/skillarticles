@@ -1,7 +1,7 @@
 package ru.skillbranch.skillarticles.extensions
 
 import android.view.View
-import androidx.coordinatorlayout.widget.CoordinatorLayout
+import android.widget.FrameLayout
 import androidx.core.view.marginBottom
 import androidx.core.view.marginEnd
 import androidx.core.view.marginStart
@@ -12,7 +12,7 @@ fun View.setMarginOptionally(start:Int = this.marginStart,
                              end:Int = this.marginEnd,
                              bottom:Int = this.marginBottom,
                             ){
-    val lp = this.layoutParams as CoordinatorLayout.LayoutParams
+    val lp = this.layoutParams as FrameLayout.LayoutParams
     lp.marginStart = start
     lp.topMargin = top
     lp.marginEnd = end
