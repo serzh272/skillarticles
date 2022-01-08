@@ -79,14 +79,14 @@ class ArticleSubmenu @JvmOverloads constructor(
         btnTextDown = CheckableImageView(context).apply {
             setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_title_black_24dp))
             setPadding(context.dpToIntPx(12))
-            setBackgroundResource(bg)
+            //setBackgroundResource(bg)
             imageTintList = iconTint
         }
         addView(btnTextDown)
         btnTextUp = CheckableImageView(context).apply {
             setPadding(defaultPadding / 2)
             setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_title_black_24dp))
-            setBackgroundResource(bg)
+            //setBackgroundResource(bg)
             imageTintList = iconTint
         }
         addView(btnTextUp)

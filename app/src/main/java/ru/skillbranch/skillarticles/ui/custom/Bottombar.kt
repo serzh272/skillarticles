@@ -86,6 +86,7 @@ class Bottombar @JvmOverloads constructor(
             isFocusable = true
             isClickable = true
             imageTintList = iconTint
+            setPadding(iconPadding)
         }
         addView(btnShare)
         btnSettings = CheckableImageView(context).apply {

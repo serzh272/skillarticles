@@ -7,7 +7,10 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.text.Spannable
 import android.util.Log
-import android.view.*
+import android.view.Gravity
+import android.view.View
+import android.view.ViewAnimationUtils
+import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -70,13 +73,13 @@ class MarkdownImageView private constructor(
     private val cornerRadius: Float = context.dpToPx(4)
 
     @ColorInt
-    private val colorSurface: Int = context.attrValue(R.attr.colorSurface, true)
+    private val colorSurface: Int = context.attrValue(R.attr.colorSurface)
 
     @ColorInt
-    private val colorOnSurface: Int = context.attrValue(R.attr.colorOnSurface, true)
+    private val colorOnSurface: Int = context.attrValue(R.attr.colorOnSurface)
 
     @ColorInt
-    private val colorOnBackground: Int = context.attrValue(R.attr.colorOnBackground, true)
+    private val colorOnBackground: Int = context.attrValue(R.attr.colorOnBackground)
 
     @ColorInt
     private var lineColor: Int = context.getColor(R.color.color_divider)
@@ -89,9 +92,8 @@ class MarkdownImageView private constructor(
     }
 
     init {
-        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
         ivImage = ImageView(context).apply {
-            scaleType = ImageView.ScaleType.CENTER_CROP
             outlineProvider = object : ViewOutlineProvider() {
                 override fun getOutline(view: View, outline: Outline) {
                     outline.setRoundRect(
@@ -106,7 +108,6 @@ class MarkdownImageView private constructor(
         //if (ivImage.id == NO_ID) ivImage.id = View.generateViewId()
 
         tvTitle = MarkdownTextView(context, fontSize * 0.75f).apply {
-            setText("title", TextView.BufferType.SPANNABLE)
             setTextColor(colorOnBackground)
             gravity = Gravity.CENTER
             typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
@@ -134,7 +135,8 @@ class MarkdownImageView private constructor(
 
         if (alt != null) {
             tvAlt = TextView(context).apply {
-                setText(alt, TextView.BufferType.SPANNABLE)
+                text = alt
+                setTextColor(colorOnSurface)
                 setTextColor(colorOnSurface)
                 setBackgroundColor(ColorUtils.setAlphaComponent(colorSurface, 160))
                 gravity = Gravity.CENTER
