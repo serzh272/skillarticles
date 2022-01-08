@@ -17,16 +17,16 @@ import androidx.annotation.VisibleForTesting
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.view.setPadding
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.switchmaterial.SwitchMaterial
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.attrValue
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
-import ru.skillbranch.skillarticles.extensions.setPaddingOptionally
 import ru.skillbranch.skillarticles.ui.custom.behaviors.SubmenuBehavior
 import kotlin.math.hypot
-import kotlin.math.roundToInt
 
 class ArticleSubmenu @JvmOverloads constructor(
     context: Context,
@@ -53,7 +53,7 @@ class ArticleSubmenu @JvmOverloads constructor(
     private var lineColor: Int = context.getColor(R.color.color_divider)
 
     @ColorInt
-    private val textColor = context.attrValue(R.attr.colorOnSurface, true)
+    private val textColor = context.attrValue(R.attr.colorOnSurface)
     private val iconTint = context.getColorStateList(R.color.tint_color)
 
     @DrawableRes
@@ -76,28 +76,25 @@ class ArticleSubmenu @JvmOverloads constructor(
         val materialBg = MaterialShapeDrawable.createWithElevationOverlay(context)
         materialBg.elevation = elevation
         background = materialBg
-        val topBottomPaddingDown = context.dpToIntPx(12)
-        val topBottomPaddingUp = context.dpToIntPx(8)
         btnTextDown = CheckableImageView(context).apply {
-            setImageResource(R.drawable.ic_title_black_24dp)
-            setBackgroundColor(bg)
+            setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_title_black_24dp))
+            setPadding(context.dpToIntPx(12))
+            setBackgroundResource(bg)
             imageTintList = iconTint
-            setPaddingOptionally(top = topBottomPaddingDown, bottom = topBottomPaddingDown)
         }
         addView(btnTextDown)
         btnTextUp = CheckableImageView(context).apply {
-            setPaddingOptionally(top = topBottomPaddingUp, bottom = topBottomPaddingUp)
-            setImageResource(R.drawable.ic_title_black_24dp)
-            setBackgroundColor(bg)
+            setPadding(defaultPadding / 2)
+            setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_title_black_24dp))
+            setBackgroundResource(bg)
             imageTintList = iconTint
         }
         addView(btnTextUp)
-        switchMode = SwitchMaterial(context).apply {
-
-        }
+        switchMode = SwitchMaterial(context)
         addView(switchMode)
         tvLabel = TextView(context).apply {
             text = resources.getString(R.string.dark_mode_label)
+            textSize = 14f
             this.setTextColor(textColor)
         }
         addView(tvLabel)
@@ -167,41 +164,43 @@ class ArticleSubmenu @JvmOverloads constructor(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val wms = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
-        val hms = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
-        tvLabel.measure(wms, hms)
-        switchMode.measure(wms, hms)
+        measureChild(switchMode, widthMeasureSpec, heightMeasureSpec)
+        measureChild(tvLabel, widthMeasureSpec, heightMeasureSpec)
         setMeasuredDimension(menuWidth, menuHeight)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onLayout(p0: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        val bodyWidth = r - l - paddingLeft - paddingRight
+        val left = paddingLeft
+        val right = paddingLeft + bodyWidth
         var usedHeight = paddingTop
         btnTextDown.layout(
-            paddingLeft,
+            left,
             usedHeight,
             btnWidth,
             usedHeight + btnHeight
         )
         btnTextUp.layout(
-            btnWidth,
+            right - btnWidth,
             usedHeight,
-            menuWidth - paddingRight,
-            usedHeight + btnHeight
+            right,
+            btnHeight
         )
         usedHeight += btnHeight
+        val deltaHLabel = (menuHeight - usedHeight - tvLabel.measuredHeight) / 2
         tvLabel.layout(
-            context.dpToIntPx(16) + paddingLeft,
-            ((menuHeight - paddingBottom + btnHeight - tvLabel.measuredHeight) / 2f).roundToInt(),
-            paddingLeft + context.dpToIntPx(16) + tvLabel.measuredWidth,
-            (menuHeight - paddingBottom + btnHeight) / 2 + tvLabel.measuredHeight / 2
+            left + defaultPadding,
+            usedHeight + deltaHLabel,
+            left + defaultPadding + tvLabel.measuredWidth,
+            usedHeight + deltaHLabel + tvLabel.measuredHeight
         )
-
+        val deltaHSwitch = (menuHeight - usedHeight - switchMode.measuredHeight) / 2
         switchMode.layout(
-            menuWidth - paddingRight - switchMode.measuredWidth - context.dpToIntPx(16),
-            ((menuHeight - paddingBottom + btnHeight - switchMode.measuredHeight) / 2f).roundToInt(),
-            menuWidth - paddingRight - context.dpToIntPx(16),
-            (menuHeight - paddingBottom + btnHeight + switchMode.measuredHeight) / 2
+            right - defaultPadding - switchMode.measuredWidth,
+            usedHeight + deltaHSwitch,
+            right - defaultPadding,
+            usedHeight + deltaHSwitch + switchMode.measuredHeight
         )
     }
 
@@ -209,20 +208,19 @@ class ArticleSubmenu @JvmOverloads constructor(
     public override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
         canvas.drawLine(
-            menuWidth / 2f,
+            canvas.width / 2f,
             0f,
-            menuWidth / 2f,
-            paddingTop + btnHeight.toFloat(),
+            canvas.width / 2f,
+            btnHeight.toFloat(),
             linePaint
         )
         canvas.drawLine(
             0f,
-            paddingTop + btnHeight.toFloat(),
-            menuWidth.toFloat(),
-            paddingTop + btnHeight.toFloat(),
+            btnHeight.toFloat(),
+            canvas.width.toFloat(),
+            btnHeight.toFloat(),
             linePaint
         )
-
     }
 
     private class SavedState : BaseSavedState, Parcelable {

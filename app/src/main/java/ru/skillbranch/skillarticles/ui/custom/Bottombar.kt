@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.view.View
 import android.view.ViewAnimationUtils
 import android.view.ViewGroup
 import android.widget.TextView
@@ -14,11 +15,14 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.animation.doOnEnd
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.google.android.material.shape.MaterialShapeDrawable
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.extensions.*
+import ru.skillbranch.skillarticles.extensions.attrValue
+import ru.skillbranch.skillarticles.extensions.dpToIntPx
+import ru.skillbranch.skillarticles.extensions.setPaddingOptionally
 import ru.skillbranch.skillarticles.ui.custom.behaviors.BottombarBehavior
 import kotlin.math.hypot
 
@@ -63,7 +67,7 @@ class Bottombar @JvmOverloads constructor(
         materialBg.elevation = elevation
         background = materialBg
         btnLike = CheckableImageView(context).apply {
-            setImageResource(R.drawable.like_states)
+            setImageDrawable(ContextCompat.getDrawable(context, R.drawable.like_states))
             imageTintList = iconTint
             setBackgroundResource(R.drawable.ripple)
             setPadding(iconPadding)
@@ -71,23 +75,26 @@ class Bottombar @JvmOverloads constructor(
         }
         addView(btnLike)
         btnBookmark = CheckableImageView(context).apply {
-            setImageResource(R.drawable.bookmark_states)
+            setImageDrawable(ContextCompat.getDrawable(context, R.drawable.bookmark_states))
             imageTintList = iconTint
             setBackgroundResource(R.drawable.ripple)
             setPadding(iconPadding)
         }
         addView(btnBookmark)
         btnShare = AppCompatImageView(context).apply {
-            setImageResource(R.drawable.ic_share_black_24dp)
+            setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_share_black_24dp))
             isFocusable = true
             isClickable = true
             imageTintList = iconTint
-            setBackgroundResource(R.drawable.ripple)
-            setPadding(iconPadding)
         }
         addView(btnShare)
         btnSettings = CheckableImageView(context).apply {
-            setImageResource(R.drawable.ic_format_size_black_24dp)
+            setImageDrawable(
+                ContextCompat.getDrawable(
+                    context,
+                    R.drawable.ic_format_size_black_24dp
+                )
+            )
             imageTintList = iconTint
             setBackgroundResource(R.drawable.ripple)
             setPadding(iconPadding)
@@ -117,46 +124,48 @@ class Bottombar @JvmOverloads constructor(
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val usedWidth = getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
-        measureChild(searchBar,widthMeasureSpec, heightMeasureSpec)
+        measureChild(searchBar, widthMeasureSpec, heightMeasureSpec)
         setMeasuredDimension(usedWidth, iconSize)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     public override fun onLayout(p0: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        var usedWidth = paddingLeft
+        val bodyWidth = r - l - paddingLeft - paddingRight
+        val left = paddingLeft
+        val right = paddingLeft + bodyWidth
+        var usedWidth = left
         btnLike.layout(
-            l + usedWidth,
-            paddingTop,
-            l + usedWidth + iconSize,
-            iconSize - paddingBottom
+            usedWidth,
+            0,
+            usedWidth + iconSize,
+            iconSize
         )
         usedWidth += iconSize
         btnBookmark.layout(
-            l + usedWidth,
-            paddingTop,
-            l + usedWidth + iconSize,
-            iconSize - paddingBottom
+            usedWidth,
+            0,
+            usedWidth + iconSize,
+            iconSize
         )
         usedWidth += iconSize
         btnShare.layout(
-            l + usedWidth,
-            paddingTop,
-            l + usedWidth + iconSize,
-            iconSize - paddingBottom
+            usedWidth,
+            0,
+            usedWidth + iconSize,
+            iconSize
         )
         btnSettings.layout(
-            r - iconSize,
-            paddingTop,
-            r,
-            iconSize - paddingBottom
+            right - iconSize,
+            0,
+            right,
+            iconSize
         )
         searchBar.layout(
-            l,
-            paddingTop,
-            r,
-            iconSize-paddingBottom
+            left,
+            0,
+            right,
+            iconSize
         )
-
     }
 
     fun setSearchState(isSearch: Boolean) {
@@ -180,20 +189,13 @@ class Bottombar @JvmOverloads constructor(
     private fun animatedShowSearch() {
         searchBar.isVisible = true
         val endRadius = hypot(width.toDouble(), height / 2.toDouble())
-        val va = ViewAnimationUtils.createCircularReveal(
+        ViewAnimationUtils.createCircularReveal(
             searchBar,
             width,
             height / 2,
             0f,
             endRadius.toFloat()
-        )
-        va.doOnEnd {
-            btnLike.isVisible = false
-            btnBookmark.isVisible = false
-            btnShare.isVisible = false
-            btnSettings.isVisible = false
-        }
-        va.start()
+        ).start()
     }
 
     private fun animateHideSearch() {
@@ -253,76 +255,94 @@ class Bottombar @JvmOverloads constructor(
         private val textMargin = context.dpToIntPx(16)
 
         init {
-            setBackgroundColor(resources.getColor(R.color.color_on_article_bar, context.theme))
+            isVisible = false
+            setBackgroundColor(context.getColor(R.color.color_on_article_bar))
             btnSearchClose = AppCompatImageView(context).apply {
-                setImageResource(R.drawable.ic_close_black_24dp)
+                setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_close_black_24dp))
                 setPadding(iconPadding)
                 imageTintList = iconTintSearch
                 setBackgroundResource(R.drawable.ripple)
-
+                isClickable = true
+                isFocusable = true
             }
             addView(btnSearchClose)
+
             tvSearchResult = TextView(context).apply {
                 text = resources.getString(R.string.not_found_text)
                 textSize = 14f
-                setTextColor(context.attrValue(R.attr.colorPrimary, true))
-                setPaddingOptionally(start = context.dpToIntPx(16))
+                setTextColor(iconColor)
+                setPaddingOptionally(start = iconPadding)
             }
             addView(tvSearchResult)
+
             btnResultDown = AppCompatImageView(context).apply {
-                setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp)
+                setImageDrawable(
+                    ContextCompat.getDrawable(
+                        context,
+                        R.drawable.ic_keyboard_arrow_down_black_24dp
+                    )
+                )
                 setPadding(iconPadding)
                 imageTintList = iconTintSearch
                 setBackgroundResource(R.drawable.ripple)
+                isClickable = true
+                isFocusable = true
             }
             addView(btnResultDown)
+
             btnResultUp = AppCompatImageView(context).apply {
-                setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp)
+                setImageDrawable(
+                    ContextCompat.getDrawable(
+                        context,
+                        R.drawable.ic_keyboard_arrow_up_black_24dp
+                    )
+                )
                 setPadding(iconPadding)
                 imageTintList = iconTintSearch
                 setBackgroundResource(R.drawable.ripple)
-
+                isClickable = true
+                isFocusable = true
             }
             addView(btnResultUp)
         }
 
         override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-
-            tvSearchResult.measure(widthMeasureSpec, heightMeasureSpec)
-            setMeasuredDimension(widthMeasureSpec, heightMeasureSpec)
+            val width = View.getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
+            measureChild(tvSearchResult, widthMeasureSpec, heightMeasureSpec)
+            setMeasuredDimension(width, iconSize)
         }
 
         override fun onLayout(p0: Boolean, l: Int, t: Int, r: Int, b: Int) {
-            var usedWidth = paddingLeft
+            val bodyWidth = r - l - paddingLeft - paddingRight
+            val left = paddingLeft
+            val right = paddingLeft + bodyWidth
+            var usedWidth = left
             btnSearchClose.layout(
-                l + usedWidth,
-                paddingTop,
-                l + usedWidth + iconSize,
-                b - paddingBottom
+                usedWidth,
+                0,
+                iconSize,
+                iconSize
             )
             usedWidth += iconSize
             tvSearchResult.layout(
-                l + usedWidth,
+                usedWidth,
                 (iconSize - tvSearchResult.measuredHeight) / 2,
-                l + usedWidth + tvSearchResult.measuredWidth,
+                usedWidth + tvSearchResult.measuredWidth,
                 (iconSize + tvSearchResult.measuredHeight) / 2
             )
             btnResultDown.layout(
-                r - 2*iconSize,
-                paddingTop,
-                r - iconSize,
-                iconSize - paddingBottom
+                right - 2 * iconSize,
+                0,
+                right - iconSize,
+                iconSize
             )
             btnResultUp.layout(
-                r - iconSize,
+                right - iconSize,
                 paddingTop,
-                r,
-                iconSize - paddingBottom
+                right,
+                iconSize
             )
-
-
         }
-
     }
 }
 
