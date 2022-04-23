@@ -2,15 +2,19 @@ package ru.skillbranch.skillarticles.ui
 
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.forEach
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.databinding.ActivityRootBinding
-import ru.skillbranch.skillarticles.extensions.selectDestination
 import ru.skillbranch.skillarticles.ui.custom.Bottombar
 import ru.skillbranch.skillarticles.viewmodels.NavCommand
 import ru.skillbranch.skillarticles.viewmodels.Notify
@@ -97,5 +101,20 @@ class RootActivity : AppCompatActivity() {
                 if (!popBackstack) navController.navigate(cmd.destination, null, cmd.options)
             }
         }
+    }
+}
+
+fun BottomNavigationView.selectDestination(destination: NavDestination) {
+    this.menu.forEach { item ->
+        if (destination.matchDestination(item.itemId)) {
+            item.isChecked = true
+        }
+    }
+}
+
+
+fun NavDestination.matchDestination(@IdRes resId: Int): Boolean {
+    return hierarchy.any {
+        it.id == resId
     }
 }

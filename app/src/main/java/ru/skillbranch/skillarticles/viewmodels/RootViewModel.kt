@@ -31,6 +31,7 @@ class RootViewModel(savedStateHandle: SavedStateHandle) :
 
     override fun topLevelNavigate(resId: Int) {
         val options = NavOptions.Builder()
+            .setLaunchSingleTop(true)
             .setEnterAnim(R.animator.nav_default_enter_anim)
             .setExitAnim(R.animator.nav_default_exit_anim)
             .setPopEnterAnim(R.animator.nav_default_pop_enter_anim)

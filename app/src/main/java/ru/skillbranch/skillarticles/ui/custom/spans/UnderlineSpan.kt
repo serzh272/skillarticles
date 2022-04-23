@@ -59,8 +59,8 @@ class UnderlineSpan(
         strokeWidth = 0f
         block()
         color = oldColor
-//        pathEffect = null
-//        style = oldStyle
-//        strokeWidth = oldWidth
+        pathEffect = null
+        style = oldStyle
+        strokeWidth = oldWidth
     }
 }
