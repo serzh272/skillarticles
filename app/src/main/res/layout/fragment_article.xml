@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ru.skillbranch.skillarticles.ui.custom.StickyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    app:stickyView="@id/wrap_comments"
+    app:threshold="100dp"
     app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -91,7 +93,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/iv_poster" />
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/wrap_comments"
             style="@style/Base.Widget.MaterialComponents.TextInputLayout"
@@ -107,6 +108,7 @@
             app:endIconDrawable="@drawable/ic_close_black_24dp"
             app:endIconMode="custom"
             app:endIconTint="@color/color_gray"
+
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_text_content">
@@ -119,5 +121,17 @@
                 android:inputType="text"
                 tools:text="comment text" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_comments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorSurface"
+            android:nestedScrollingEnabled="true"
+            android:paddingBottom="16dp"
+            app:layout_constraintBaseline_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/wrap_comments" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+</ru.skillbranch.skillarticles.ui.custom.StickyScrollView>

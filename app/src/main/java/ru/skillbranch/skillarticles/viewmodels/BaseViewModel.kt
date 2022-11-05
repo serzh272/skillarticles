@@ -81,7 +81,7 @@ abstract class BaseViewModel<T>(initState: T, private val savedStateHandle: Save
         state
             .map(transform)
             .distinctUntilChanged()
-            .observe(owner, Observer { onChanged(it!!) })
+            .observe(owner, Observer { onChanged(it) })
     }
 
     /***

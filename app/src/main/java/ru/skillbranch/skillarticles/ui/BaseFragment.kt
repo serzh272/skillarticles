@@ -49,6 +49,8 @@ abstract class BaseFragment<S, T : BaseViewModel<S>, B : ViewBinding>(@LayoutRes
 
     private fun activityInflated() {
         root.viewBinding.appbar.setExpanded(true, true)
+        root.viewBinding.toolbar.logo = null
+        root.viewBinding.toolbar.subtitle = null
         setupActivityViews()
     }
 

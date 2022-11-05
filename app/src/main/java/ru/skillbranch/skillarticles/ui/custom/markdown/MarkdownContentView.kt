@@ -81,8 +81,8 @@ class MarkdownContentView @JvmOverloads constructor(
                 is MarkdownElement.Text -> {
                     val tv = MarkdownTextView(context, textSize).apply {
                         setPaddingOptionally(
-                            start = context.dpToIntPx(8),
-                            end = context.dpToIntPx(8)
+                            left = context.dpToIntPx(8),
+                            right = context.dpToIntPx(8)
                         )
                         setLineSpacing(fontSize * 0.5f, 1f)
                     }

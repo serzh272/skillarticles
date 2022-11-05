@@ -4,10 +4,18 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
+import androidx.paging.liveData
+import kotlinx.coroutines.launch
 import ru.skillbranch.skillarticles.data.AppSettings
 import ru.skillbranch.skillarticles.data.ArticleData
 import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
+import ru.skillbranch.skillarticles.data.network.res.CommentRes
 import ru.skillbranch.skillarticles.data.repositories.ArticleRepository
+import ru.skillbranch.skillarticles.data.repositories.CommentDataSource
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.data.repositories.clearContent
 import ru.skillbranch.skillarticles.extensions.asMap
@@ -28,6 +36,22 @@ class ArticleViewModel(savedStateHandle: SavedStateHandle) :
         ArticleFragmentArgs.fromSavedStateHandle(savedStateHandle)
     private val articleId = args.articleId
     private var clearContent: String? = null
+
+    private lateinit var dataSource: CommentDataSource
+
+    val commentPager = Pager(
+        config = PagingConfig(
+            pageSize = 20,
+            initialLoadSize = 20,
+            prefetchDistance = 40
+        ),
+        pagingSourceFactory = {
+            repository.makeCommentsDataSource(articleId)
+                .also { dataSource = it }
+        }
+    )
+        .liveData
+        .cachedIn(viewModelScope)
 
     init {
 
@@ -160,6 +184,27 @@ class ArticleViewModel(savedStateHandle: SavedStateHandle) :
         notify(Notify.TextMessage("Code copy to clipboard"))
     }
 
+    override fun handleSendMessage(message: String) {
+        updateState { state -> state.copy(message = message) }
+        //TODO check auth this
+        viewModelScope.launch {
+            repository.sendMessage(articleId, message, currentState.answerId)
+            dataSource.invalidate()
+            updateState { state -> state.copy(answerName = null, answerId = null) }
+        }
+    }
+
+    override fun answerTo(comment: CommentRes?) {
+        if (comment != null) {
+            updateState { state ->
+                state.copy(
+                    answerName = comment?.user?.name,
+                    answerId = comment.id
+                )
+            }
+        }
+    }
+
 }
 
 data class ArticleState(
@@ -184,7 +229,9 @@ data class ArticleState(
     val poster: String? = null, //обложка статьи
     val content: List<MarkdownElement> = emptyList(), //контент
     val reviews: List<Any> = emptyList(), //комментарии
-    val message: String? = null
+    val message: String? = null,
+    val answerName: String? = null,
+    val answerId: String? = null,
 ) : VMState {
     override fun toBundle(): Bundle {
         val map = copy(content = emptyList(), isLoadingContent = true)

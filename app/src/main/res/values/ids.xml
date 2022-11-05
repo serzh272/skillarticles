@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item type="id" name="bottombar" />
-    <item type="id" name="submenu" />
+    <item name="bottombar" type="id" />
+    <item name="submenu" type="id" />
     <!--for ArticleItemView-->
-    <item type="id" name="iv_poster" />
-    <item type="id" name="iv_category" />
-    <item type="id" name="iv_likes" />
-    <item type="id" name="iv_comments" />
-    <item type="id" name="iv_bookmark" />
-    <item type="id" name="tv_date" />
-    <item type="id" name="tv_author" />
-    <item type="id" name="tv_title" />
-    <item type="id" name="tv_description" />
-    <item type="id" name="tv_likes_count" />
-    <item type="id" name="tv_comments_count" />
-    <item type="id" name="tv_read_duration" />
+    <item name="iv_poster" type="id" />
+    <item name="iv_category" type="id" />
+    <item name="iv_likes" type="id" />
+    <item name="iv_comments" type="id" />
+    <item name="iv_bookmark" type="id" />
+    <item name="tv_date" type="id" />
+    <item name="tv_author" type="id" />
+    <item name="tv_title" type="id" />
+    <item name="tv_description" type="id" />
+    <item name="tv_likes_count" type="id" />
+    <item name="tv_comments_count" type="id" />
+    <item name="tv_read_duration" type="id" />
+    <item name="tv_comment_body" type="id" />
 </resources>

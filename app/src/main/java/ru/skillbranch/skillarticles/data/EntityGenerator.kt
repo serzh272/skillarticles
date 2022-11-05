@@ -1,250 +1,197 @@
 package ru.skillbranch.skillarticles.data
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.paging.PagingSource
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.local.User
 import ru.skillbranch.skillarticles.data.network.res.ArticleRes
 import ru.skillbranch.skillarticles.data.network.res.CommentRes
-import ru.skillbranch.skillarticles.viewmodels.articles.ArticleItem
+import ru.skillbranch.skillarticles.extensions.add
 import java.util.*
-import kotlin.math.max
+import java.util.concurrent.TimeUnit
+import kotlin.random.Random.Default.nextBoolean
 
-object LocalDataHolder {
-    private lateinit var dataSource: PagingSource<Int, ArticleItem>
-    private val localArticles = mutableMapOf<String, ArticleItem>()
-    private val articleData = MutableLiveData<ArticleData?>()
-    private val articleInfo = MutableLiveData<ArticlePersonalInfo?>(null)
-    private val settings = MutableLiveData(AppSettings())
-    private val isAuth = MutableLiveData(false)
-
-    fun findArticle(articleId: String): LiveData<ArticleData?> {
-        GlobalScope.launch {
-            delay(1000)
-            articleData.postValue(
-                ArticleData(
-                    title = "Drawing a rounded corner background on text",
-                    category = "Android",
-                    categoryIcon = R.drawable.logo,
-                    date = Date(),
-                    author = "Florina Muntenescu"
+object EntityGenerator {
+    fun generateArticles(count: Int): List<ArticleRes> =
+        Array(count) { articleItems[it % 6] }
+            .toList()
+            .mapIndexed { index, article ->
+                article.copy(
+                    id = "$index",
+                    commentCount = 30,
+                    readDuration = (2..10).random(),
+                    likeCount = (15..100).random(),
+                    date = Date().add(-index.toLong(), TimeUnit.DAYS)
                 )
-            )
+            }
+
+    fun generateComments(count: Int): List<CommentRes> = Array(count) {
+        CommentRes(
+            id = "$it",
+            user = users[users.indices.random()],
+            message = commentsContent[commentsContent.indices.random()],
+            date = Date().add(-count.inc().toLong(), TimeUnit.DAYS).add(it.toLong(), TimeUnit.DAYS),
+            slug = "$it/"
+        )
+    }
+        .toList()
+        .fold(mutableListOf()) { acc, comment ->
+            val hasAnswer = nextBoolean()
+            if (hasAnswer && acc.isNotEmpty()) {
+                acc.add(
+                    comment.copy(
+                        answerTo = acc.last().user.name,
+                        slug = "${acc.last().slug}${comment.slug}"
+                    )
+                )
+            } else acc.add(comment)
+            acc
         }
-        return articleData
 
+    private fun createArticleItem(articleId: String): ArticleRes {
+        return articleItems[articleId.toInt() % 6].copy(
+            id = articleId,
+            commentCount = (10..40).random(),
+            readDuration = (2..10).random(),
+            likeCount = (15..100).random()
+        )
     }
 
-    fun findArticlePersonalInfo(articleId: String): LiveData<ArticlePersonalInfo?> {
-        GlobalScope.launch {
-            delay(500)
-            articleInfo.postValue(ArticlePersonalInfo(isBookmark = true))
-        }
-        return articleInfo
+    fun generateArticles(offset: Int, limit: Int): List<ArticleRes> {
+        return Array(limit) {
+            createArticleItem("${offset + it}")
+        }.toList()
     }
+}
 
-    fun updateArticlePersonalInfo(info: ArticlePersonalInfo) {
-//        Log.e("DataHolder", "update personal info: $info");
-        articleInfo.value = info
-    }
-
-    fun findArticles(): LiveData<List<ArticleItem>> {
-        val article = ArticleItem(
+private val articleItems = Array(6) {
+    when (it) {
+        1 -> ArticleRes(
             id = "0",
-            date = Date(),
+            categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            category = "Android",
+            title = "Architecture Components pitfalls",
+            description = "LiveData and the Fragment lifecycle",
+            author = "Christophe Beyls",
+            authorAvatar = "https://miro.medium.com/fit/c/96/96/0*zhOjC9mtKiAzmBQo.png",
+            poster = "https://miro.medium.com/max/800/1*Cd_1M-LJ46t6xo79LfMGVw.jpeg",
+            date = Date()
+        )
+
+        2 -> ArticleRes(
+            id = "0",
+            categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            category = "Android",
+            title = "Using Safe args plugin — current state of affairs",
+            description = "Article describing usage of Safe args Gradle plugin with the Navigation Architecture Component and current support for argument types",
+            author = "Veronika Petruskova",
+            authorAvatar = "https://miro.medium.com/fit/c/96/96/1*VSq5CqY3y1Bb4CLK83ZIuw.png",
+            poster = "https://miro.medium.com/max/1920/1*u4uWVOpqFCR1gGpJTewhhA.jpeg",
+            date = Date()
+        )
+
+        3 -> ArticleRes(
+            id = "0",
+            categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            category = "Android",
+            title = "Observe LiveData from ViewModel in Fragment",
+            description = "Google introduced Android architecture components which are basically a collection of libraries that facilitate robust design, testable",
+            author = "Sagar Begale",
+            authorAvatar = "https://miro.medium.com/fit/c/96/96/2*0yEmon3hJKcxVIXjSJeR3Q.jpeg",
+            poster = "https://miro.medium.com/max/1600/0*BDD1KysQZFMeH3pc.png",
+            date = Date()
+        )
+
+        4 -> ArticleRes(
+            id = "0",
+            categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            category = "Android",
+            title = "The New Android In-App Navigation",
+            description = "How to integrate Navigation Architecture Component in your app in different use cases",
+            author = "Veronika Petruskova",
+            authorAvatar = "https://miro.medium.com/fit/c/96/96/1*VSq5CqY3y1Bb4CLK83ZIuw.png",
+            poster = "https://miro.medium.com/max/6000/0*QocVcbGZ4MeJbTCZ",
+            date = Date()
+        )
+
+        5 -> ArticleRes(
+            id = "0",
+            categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            category = "Android",
+            title = "Optimizing Android ViewModel with Lifecycle 2.2.0",
+            description = "Initialization, passing arguments, and saved state",
+            author = "Adam Hurwitz",
+            authorAvatar = "https://miro.medium.com/fit/c/96/96/2*0yEmon3hJKcxVIXjSJeR3Q.jpeg",
+            poster = "https://miro.medium.com/max/4011/1*voHEHCw6ZWrWGMmZ_xtpBQ.png",
+            date = Date()
+        )
+        else -> ArticleRes(
+            id = "0",
+            categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            category = "Android",
             author = "Florina Muntenescu",
             authorAvatar = "https://miro.medium.com/fit/c/96/96/1*z2H2HkOuv5bAOuIvUUN-5w.jpeg",
             title = "Drawing a rounded corner background on text",
-            description = "Let’s say that we need to draw a rounded corner background on text, supporting the following cases",
+            description = "Let’s say that we need to draw a **rounded** corner background on text, supporting the following cases",
             poster = "https://miro.medium.com/max/4209/1*GHjquSrfS6bNSjr_rsDSJw.png",
-            category = "Android",
-            categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
-            likeCount = 16,
-            commentCount = 2,
-            readDuration = 3,
-            categoryId = "0"
-        )
-        return MutableLiveData(
-            listOf(
-                article,
-                article.copy(
-                    id = "1",
-                    title = "Architecture Components pitfalls",
-                    description = "LiveData and the Fragment lifecycle",
-                    author = "Christophe Beyls",
-                    authorAvatar = "https://miro.medium.com/fit/c/96/96/0*zhOjC9mtKiAzmBQo.png",
-                    poster = "https://miro.medium.com/max/800/1*Cd_1M-LJ46t6xo79LfMGVw.jpeg"
-                ),
-                article.copy(
-                    id = "2",
-                    title = "Using Safe args plugin — current state of affairs",
-                    description = "Article describing usage of Safe args Gradle plugin with the Navigation Architecture Component and current support for argument types",
-                    author = "Veronika Petruskova",
-                    date = Date(1586602982217),
-                    authorAvatar = "https://miro.medium.com/fit/c/96/96/1*VSq5CqY3y1Bb4CLK83ZIuw.png",
-                    poster = "https://miro.medium.com/max/1920/1*u4uWVOpqFCR1gGpJTewhhA.jpeg"
-                ),
-                article.copy(
-                    id = "3",
-                    title = "Observe LiveData from ViewModel in Fragment",
-                    description = "Google introduced Android architecture components which are basically a collection of libraries that facilitate robust design, testable",
-                    author = "Sagar Begale",
-                    authorAvatar = "https://miro.medium.com/fit/c/96/96/2*0yEmon3hJKcxVIXjSJeR3Q.jpeg",
-                    poster = "https://miro.medium.com/max/1600/0*BDD1KysQZFMeH3pc.png"
-                ),
-                article.copy(
-                    id = "4",
-                    title = "The New Android In-App Navigation",
-                    description = "How to integrate Navigation Architecture Component in your app in different use cases",
-                    author = "Veronika Petruskova",
-                    authorAvatar = "https://miro.medium.com/fit/c/96/96/1*VSq5CqY3y1Bb4CLK83ZIuw.png",
-                    poster = "https://miro.medium.com/max/6000/0*QocVcbGZ4MeJbTCZ"
-                ),
-                article.copy(
-                    id = "5",
-                    title = "Optimizing Android ViewModel with Lifecycle 2.2.0",
-                    description = "Initialization, passing arguments, and saved state",
-                    author = "Adam Hurwitz",
-                    authorAvatar = "https://miro.medium.com/fit/c/96/96/2*0yEmon3hJKcxVIXjSJeR3Q.jpeg",
-                    poster = "https://miro.medium.com/max/4011/1*voHEHCw6ZWrWGMmZ_xtpBQ.png"
-                )
-            )
+            date = Date()
         )
     }
+}.toList()
 
-    suspend fun loadArticles(offset: Int, limit: Int): List<ArticleItem> {
-        delay(500)
-        return localArticles
-            .values
-            .drop(offset)
-            .take(limit)
-    }
-
-    suspend fun insertArticles(articles: List<ArticleItem>) {
-        val needInvalidate = !localArticles.values.containsAll(articles)
-        localArticles.putAll(articles.associateBy { it.id })
-//        if (needInvalidate) {
-        dataSource.invalidate()
-//            Log.e("DataHolder", "invalidate local $needInvalidate")
-//        }
-    }
-
-    fun attachDataSource(ds: PagingSource<Int, ArticleItem>) {
-        dataSource = ds
-    }
-}
-
-object NetworkDataHolder {
-    private val articles: List<ArticleRes> = EntityGenerator.generateArticles(70)
-    private val comments: Map<String, MutableList<CommentRes>> = articles.associate { article ->
-        article.id to EntityGenerator.generateComments(article.commentCount) as MutableList
-    }
-
-    suspend fun loadComments(articleId: String, offset: Int?, limit: Int): List<CommentRes> {
-        delay(3000)
-        return comments[articleId]
-            ?.drop(max(0, offset ?: 0))
-            ?.take(limit) ?: emptyList()
-    }
-
-
-    fun loadArticleContent(articleId: String): LiveData<String?> {
-        val content = MutableLiveData<String?>(null)
-        GlobalScope.launch {
-            delay(500)
-            when (articleId.toInt() % 6) {
-                0 -> content.postValue(article1)
-                1 -> content.postValue(article2)
-                2 -> content.postValue(article3)
-                3 -> content.postValue(article4)
-                4 -> content.postValue(article5)
-                5 -> content.postValue(article6)
-                else -> content.postValue(article1)
-            }
-        }
-        return content
-    }
-
-    fun login(login: String, password: String): Pair<User, String> {
-        val user = User(
-            id = "0",
-            name = "Veronika Petruskova",
-            avatar = "https://miro.medium.com/fit/c/96/96/1*VSq5CqY3y1Bb4CLK83ZIuw.png",
-            about = "something about"
-        )
-
-        val token =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwY2RiYmYyNjg2Yzg5MDAxZWM2MmI2YSIsInJvbGUiOiJzdXBlcmFkbWluIiwib3duZXIiOiJkb2JyaXktY29mZmVlIiwiaWF0IjoxNjI2NjI1MDA0LCJleHAiOjE2MjcyMjk4MDR9.GmRo7YYCfXFC1haCK1_Fj1zW92fjhm3u3N6mVrLjmc8"
-
-        return user to token
-    }
-
-    fun sendMessage(articleId: String, message: String, answerId: String?) {
-        val me = User(
-            id = "0",
-            name = "test user",
+private val users = Array(5) {
+    when (it) {
+        1 -> User(
+            id = "1",
+            name = "Christophe Beyls",
             avatar = "https://miro.medium.com/fit/c/96/96/0*zhOjC9mtKiAzmBQo.png",
             rating = (0..100).random(),
-            respect = (0..300).random()
+            respect = (0..300).random(),
         )
-        val comments = comments[articleId]!!
-        val last = comments.last()
-        val nextId = last.id.toInt().inc().toString()
-        var comment =
-            CommentRes(id = nextId, user = me, message = message, date = Date(), slug = "$nextId/")
-        if (answerId == null) {
-            comments.add(comment)
-            Log.e("DataHolder", "$comment")
-        } else {
-            val ind = comments.indexOfFirst { it.id == answerId }
-            comment = comment.copy(
-                id = nextId,
-                slug = "${comments[ind].id}/$nextId/",
-                answerTo = comments[ind].user.name
-            )
-            comments.add(ind.inc(), comment)
-            Log.e("DataHolder", "answer to $answerId $comment")
-        }
 
+        2 -> User(
+            id = "2",
+            name = "Veronika Petruskova",
+            avatar = "https://miro.medium.com/fit/c/96/96/1*VSq5CqY3y1Bb4CLK83ZIuw.png",
+            rating = (0..100).random(),
+            respect = (0..300).random(),
+        )
 
+        3 -> User(
+            id = "3",
+            name = "Sagar Begale",
+            avatar = "https://miro.medium.com/fit/c/96/96/2*0yEmon3hJKcxVIXjSJeR3Q.jpeg",
+            rating = (0..100).random(),
+            respect = (0..300).random(),
+        )
+
+        4 -> User(
+            id = "4",
+            name = "Florina Muntenescu",
+            avatar = "https://miro.medium.com/fit/c/96/96/1*z2H2HkOuv5bAOuIvUUN-5w.jpeg",
+            rating = (0..100).random(),
+            respect = (0..300).random(),
+        )
+
+        else -> User(
+            id = "0",
+            name = "Adam Hurwitz",
+            avatar = "https://miro.medium.com/fit/c/96/96/2*0yEmon3hJKcxVIXjSJeR3Q.jpeg",
+            rating = (0..100).random(),
+            respect = (0..300).random(),
+        )
     }
-
-    suspend fun loadArticles(offset: Int?, limit: Int = 10): List<ArticleRes> {
-        delay(3000)
-        return articles
-            .drop(offset ?: 0)
-            .take(limit)
-    }
-}
-
-data class ArticleData(
-    val shareLink: String? = null,
-    val title: String? = null,
-    val category: String? = null,
-    val categoryIcon: Any? = null,
-    val date: Date,
-    val author: Any? = null,
-    val poster: String? = null,
-    val content: List<Any> = emptyList()
+}.toList()
+private val commentsContent = listOf(
+    "Nice.Thanks for sharing. Next you asked? We need to add math/scientific notations to TextView and also draw curvy (and straight, of course) microeconomics graphs e.g cost curve, demand and supply curve etc. It’d be nice if you can write about it for your next piece.",
+    "Nice article,thanks for sharing",
+    "Great article!",
+    "Would be useful for one of my use cases. Would be nice to have that functionality.",
+    "Thats what we need",
+    "Much needed thanks a lot",
+    "Sounds interesting, I will try it!",
+    "Thanks for article, finally I understand how it works and for what it needed.",
+    "Thank you for the explanation!\n\nthis seems like something that the compiler should optimize automatically."
 )
 
-data class ArticlePersonalInfo(
-    val isLike: Boolean = false,
-    val isBookmark: Boolean = false
-)
-
-
-data class AppSettings(
-    val isDarkMode: Boolean = false,
-    val isBigText: Boolean = false
-)
-
-val article1: String = """
+val articleContent1: String = """
 Let’s say that we need to draw a **rounded** corner background on text, supporting the following cases:
 
 * Set the background on one line text
@@ -343,7 +290,7 @@ The Android text APIs allow you a great deal of freedom to perform styling. Simp
 What kind of text styling did you have to do that required custom `TextView` implementations? What kind of issues did you encounter? Tell us in the comments!
 """.trimIndent()
 
-val article2: String = """
+val articleContent2: String = """
 The new Android [Architecure Components](https://developer.android.com/topic/libraries/architecture/) are soon to be announced as stable after a few months of public testing.
 
 A lot has already been written about the basics (starting with the very good documentation) so I won’t cover them here. Instead I would like to focus on important pitfalls that are mostly undocumented and rarely discussed and may cause issues in your applications if you miss them. In this first article, I’ll talk about our beloved Fragments.
@@ -626,7 +573,7 @@ Now you are aware of this behavior and have at least a few options to work aroun
 Don’t hesitate to discuss this in the comments section and please share if you like.
 """.trimIndent()
 
-val article3: String = """
+val articleContent3: String = """
 Couple of days ago I started working with the new Navigation Component that was presented at this years Google I/O and is part of Android Jetpack. While reading about it in official documentation, I stumbled upon a section about passing data between destinations using safe args Gradle plugin. As documentation states, safe args plugin
 
 > generates simple object and builder classes for type-safe access to arguments specified for destinations and actions. Safe args is built on top of the Bundle.
@@ -755,7 +702,7 @@ That’s all for now. I hope you find information in this post useful. If you ha
 Also this is my first post so every single clap will be really appreciated. 👏❤️
 """.trimIndent()
 
-val article4: String = """
+val articleContent4: String = """
 Google introduced Android architecture components which are basically a collection of libraries that facilitate robust design, testable, and maintainable apps. It includes convenient and less error-prone handling of LifeCycle and prevents memory leaks.
 
 Although these components are easy to use with exhaustive documentation, using them inappropriately leads to several issues which could be difficult to debug.
@@ -848,7 +795,7 @@ Based on the [documentation](https://developer.android.com/topic/libraries/archi
 If we observe in `onCreate` and Fragment's view is recreated (visible → backstack → comes back), we have to update the values from `ViewModel` manually. This is because `LiveData` will not call the observer since it had already delivered the last result to that observer.
 """.trimIndent()
 
-val article5: String = """
+val articleContent5: String = """
 During the past few weeks I had time to dive into the Navigation Architecture Component that Google presented at this years Google I/O. It is a part of Android [Jetpack](https://developer.android.com/jetpack/) and its main goal is to ease in-app navigation on Android.
 
 I’m going to show you how navigation component can simplify your everyday Android stuff like navigating when clicking on adapter item or through navigation drawer.
@@ -1043,7 +990,7 @@ There are still some topics that I haven’t covered in this article. **Deep lin
 If you have any suggestions or questions, feel free to leave a comment below. Don’t forget to leave 👏 if you liked the post. It will be appreciated. ❤️
 """.trimIndent()
 
-val article6: String = """
+val articleContent6: String = """
 The Lifecycle 2.2.0 update including simplified initialization with `by viewModels()` and `by activityViewModels()` syntax for the ViewModel (VM) component is great for quickly creating VMs. What about re-using the VM instance throughout the Fragment, passing arguments/parameters into the VM while also enabling saved state? With a bit of customization, the above can be achieved as I recently shipped in the latest version of the [Coinverse app](https://play.google.com/store/apps/details?id=app.coinverse).
 ### Setup
 To take advantage of the latest VM component, declare the most recent [Lifecycle dependencies](https://developer.android.com/jetpack/androidx/releases/lifecycle#declaring_dependencies) in the *build.gradle (Module: app)* file for `lifecycle-viewmodel-ktx` and `lifecycle-livedata-ktx`. The `jvmTarget` also needs to be defined in order to implement the `by viewModels` syntax we’ll use below.
@@ -1175,3 +1122,12 @@ class Fragment: Fragment() {
     }
 }```
 """.trimIndent()
+
+val articlesContent = listOf(
+    articleContent1,
+    articleContent2,
+    articleContent3,
+    articleContent4,
+    articleContent5,
+    articleContent6
+)

@@ -283,7 +283,7 @@ class Bottombar(baseContext: Context) :
                 text = resources.getString(R.string.not_found_text)
                 textSize = 14f
                 setTextColor(iconColor)
-                setPaddingOptionally(start = iconPadding)
+                setPaddingOptionally(left = iconPadding)
             }
             addView(tvSearchResult)
 

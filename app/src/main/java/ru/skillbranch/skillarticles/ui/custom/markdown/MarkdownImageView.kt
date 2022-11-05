@@ -113,7 +113,7 @@ class MarkdownImageView private constructor(
             setTextColor(colorOnBackground)
             gravity = Gravity.CENTER
             typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
-            setPaddingOptionally(start = titlePadding, end = titlePadding)
+            setPaddingOptionally(left = titlePadding, right = titlePadding)
         }
         addView(tvTitle)
         //if (tvTitle.id == NO_ID) tvTitle.id = View.generateViewId()

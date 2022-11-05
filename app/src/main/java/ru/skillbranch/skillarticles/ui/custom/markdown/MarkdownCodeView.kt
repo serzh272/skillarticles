@@ -106,7 +106,7 @@ class MarkdownCodeView private constructor(
         tvCodeView = MarkdownTextView(context, fontSize*0.85f,false).apply {
             typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
             setTextColor(textColor)
-            setPaddingOptionally(end = textExtraPadding)
+            setPaddingOptionally(right = textExtraPadding)
             isFocusable = true
             isFocusableInTouchMode = true
         }

@@ -2,8 +2,10 @@ package ru.skillbranch.skillarticles.ui.article
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.*
+import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.AppCompatImageView
@@ -14,23 +16,21 @@ import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions.circleCropTransform
 import com.google.android.material.appbar.AppBarLayout
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.data.network.res.CommentRes
 import ru.skillbranch.skillarticles.databinding.FragmentArticleBinding
-import ru.skillbranch.skillarticles.extensions.dpToIntPx
-import ru.skillbranch.skillarticles.extensions.format
-import ru.skillbranch.skillarticles.extensions.hideKeyboard
-import ru.skillbranch.skillarticles.extensions.setMarginOptionally
+import ru.skillbranch.skillarticles.extensions.*
 import ru.skillbranch.skillarticles.ui.BaseFragment
 import ru.skillbranch.skillarticles.ui.IArticleView
 import ru.skillbranch.skillarticles.ui.custom.ArticleSubmenu
 import ru.skillbranch.skillarticles.ui.custom.Bottombar
 import ru.skillbranch.skillarticles.ui.delegates.viewBinding
-import ru.skillbranch.skillarticles.viewmodels.*
 import ru.skillbranch.skillarticles.viewmodels.article.*
 
 
@@ -45,17 +45,137 @@ class ArticleFragment :
     private lateinit var bottombar: Bottombar
     private lateinit var submenu: ArticleSubmenu
 
+    private var commentAdapter: CommentAdapter? = null
+
     private val logoSize: Int by lazy { dpToIntPx(40) }
     private val cornerRadius: Int by lazy { dpToIntPx(8) }
 
     private val args: ArticleFragmentArgs by navArgs()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_article, container, false)
+    override fun setupViews() {
+        setupCopyListener()
+        with(viewBinding) {
+            Glide.with(this@ArticleFragment)
+                .load(args.authorAvatar)
+                .placeholder(R.drawable.logo_placeholder)
+                .apply(circleCropTransform())
+                .override(logoSize)
+                .into(ivAuthorAvatar)
+            Glide.with(this@ArticleFragment)
+                .load(args.poster)
+                .placeholder(R.drawable.poster_placeholder)
+                .transform(CenterCrop(), RoundedCorners(cornerRadius))
+                .into(ivPoster)
+            tvTitle.text = args.title
+            tvAuthor.text = args.author
+            tvDate.text = args.date.format()
+
+            etComment.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_SEND) onClickMessageSend()
+                true
+            }
+
+            etComment.setOnFocusChangeListener { _, isFocused ->
+                wrapComments.isEndIconVisible = isFocused
+            }
+
+            wrapComments.isEndIconVisible = false
+            wrapComments.setEndIconOnClickListener {
+                it.hideKeyboard()
+                etComment.setText("")
+                etComment.clearFocus()
+                viewModel.answerTo(null)
+            }
+
+            with(rvComments) {
+                val maxHeight = screenHeight() - wrapComments.height
+                layoutParams = layoutParams.apply {
+                    height = maxHeight
+                }
+                CommentAdapter(::onSelectComment)
+                    .also { commentAdapter = it }
+                    .run {
+                        adapter = withLoadStateFooter(footer = LoadStateItemsAdapter(::retry))
+                        layoutManager = LinearLayoutManager(requireContext())
+                    }
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_search, menu)
+        val menuItem = menu.findItem(R.id.action_search)
+        searchView = (menuItem?.actionView as SearchView)
+        searchView.queryHint = getString(R.string.article_search_placeholder)
+        if (viewModel.currentState.isSearch) {
+            menuItem.expandActionView()
+            searchView.setQuery(viewModel.currentState.searchQuery, false)
+            searchView.requestFocus()
+        } else {
+            searchView.clearFocus()
+        }
+        menuItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                viewModel.handleSearchMode(true)
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                viewModel.handleSearchMode(false)
+                return true
+            }
+        })
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.handleSearch(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.handleSearch(newText)
+                return true
+            }
+        })
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun setupActivityViews() {
+        root.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        root.viewBinding.navView.isVisible = false
+        toolbar = root.viewBinding.toolbar
+        bottombar = Bottombar(requireContext())
+        submenu = ArticleSubmenu(requireContext())
+        root.viewBinding.coordinatorContainer.addView(bottombar)
+        root.viewBinding.coordinatorContainer.addView(submenu)
+        setupToolbar()
+        setupBottomBar()
+        setupSubmenu()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        root.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+        root.viewBinding.navView.isVisible = true
+        toolbar.logo = null
+        toolbar.subtitle = null
+        root.viewBinding.coordinatorContainer.removeView(bottombar)
+        root.viewBinding.coordinatorContainer.removeView(submenu)
+    }
+
+    override fun observeViewModelData() {
+        viewModel.observeSubState(this, ArticleState::toBottombarData, ::renderBottombar)
+        viewModel.observeSubState(this, ArticleState::toSubmenuData, ::renderSubmenu)
+
+        viewModel.observeSubState(viewLifecycleOwner, { it.answerName }, ::renderAnswerTo)
+
+        viewModel.commentPager.observe(viewLifecycleOwner) {
+            commentAdapter?.submitData(viewLifecycleOwner.lifecycle, it)
+        }
     }
 
     override fun setupSubmenu() {
@@ -76,14 +196,14 @@ class ArticleFragment :
                 if (!viewBinding.tvTextContent.hasFocus()) {
                     viewBinding.tvTextContent.requestFocus()
                 }
-                requireContext().hideKeyboard(it)
+                it.hideKeyboard()
                 viewModel.handleUpResult()
             }
             btnResultDown.setOnClickListener {
                 if (!viewBinding.tvTextContent.hasFocus()) {
                     viewBinding.tvTextContent.requestFocus()
                 }
-                requireContext().hideKeyboard(it)
+                it.hideKeyboard()
                 viewModel.handleDownResult()
             }
             btnSearchClose.setOnClickListener {
@@ -100,12 +220,14 @@ class ArticleFragment :
             btnSettings.isChecked = data.isShowMenu
         }
         if (data.isSearch) {
+            root.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
             showSearchBar(data.resultsCount, data.searchPosition)
             with(toolbar) {
                 (layoutParams as AppBarLayout.LayoutParams).scrollFlags =
                     AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
             }
         } else {
+            root.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
             hideSearchBar()
             with(toolbar) {
                 (layoutParams as AppBarLayout.LayoutParams).scrollFlags =
@@ -198,94 +320,36 @@ class ArticleFragment :
         }
     }
 
-    override fun setupViews() {
-        setupCopyListener()
-        with(viewBinding) {
-            Glide.with(this@ArticleFragment)
-                .load(args.authorAvatar)
-                .placeholder(R.drawable.logo_placeholder)
-                .apply(circleCropTransform())
-                .override(logoSize)
-                .into(ivAuthorAvatar)
-            Glide.with(this@ArticleFragment)
-                .load(args.poster)
-                .placeholder(R.drawable.poster_placeholder)
-                .transform(CenterCrop(), RoundedCorners(cornerRadius))
-                .into(ivPoster)
-            tvTitle.text = args.title
-            tvAuthor.text = args.author
-            tvDate.text = args.date.format()
+    override fun onClickMessageSend() {
+        with(viewBinding.etComment) {
+            hideKeyboard()
+            clearFocus()
+            viewModel.handleSendMessage(text.toString())
+            setText("")
         }
     }
 
-    override fun setupActivityViews() {
-        root.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-        root.viewBinding.navView.isVisible = false
-        toolbar = root.viewBinding.toolbar
-        bottombar = Bottombar(requireContext())
-        submenu = ArticleSubmenu(requireContext())
-        root.viewBinding.coordinatorContainer.addView(bottombar)
-        root.viewBinding.coordinatorContainer.addView(submenu)
-        setupToolbar()
-        setupBottomBar()
-        setupSubmenu()
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_article, container, false)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        root.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
-        root.viewBinding.navView.isVisible = true
-        toolbar.logo = null
-        toolbar.subtitle = null
-        root.viewBinding.coordinatorContainer.removeView(bottombar)
-        root.viewBinding.coordinatorContainer.removeView(submenu)
-    }
-
-    override fun observeViewModelData() {
-        viewModel.observeSubState(this, ArticleState::toBottombarData, ::renderBottombar)
-        viewModel.observeSubState(this, ArticleState::toSubmenuData, ::renderSubmenu)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setHasOptionsMenu(true)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_search, menu)
-        val menuItem = menu.findItem(R.id.action_search)
-        searchView = (menuItem?.actionView as SearchView)
-        searchView.queryHint = getString(R.string.article_search_placeholder)
-        if (viewModel.currentState.isSearch) {
-            menuItem.expandActionView()
-            searchView.setQuery(viewModel.currentState.searchQuery, false)
-            searchView.requestFocus()
-        } else {
-            searchView.clearFocus()
+    override fun onSelectComment(comment: CommentRes) {
+        with(viewBinding.wrapComments) {
+            requestRectangleOnScreen(Rect(0, 0, width, height), false)
+            postDelayed({
+                viewBinding.etComment.showKeyboard()
+            }, 300)
         }
-        menuItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-                viewModel.handleSearchMode(true)
-                return true
-            }
+        viewModel.answerTo(comment)
+    }
 
-            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                viewModel.handleSearchMode(false)
-                return true
-            }
-        })
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                viewModel.handleSearch(query)
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.handleSearch(newText)
-                return true
-            }
-        })
-        super.onCreateOptionsMenu(menu, inflater)
+    override fun renderAnswerTo(answerName: String?) {
+        with(viewBinding.wrapComments) {
+            hint = answerName?.let { "Answer to: $it" } ?: "Comment"
+        }
     }
 }

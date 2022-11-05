@@ -3,17 +3,19 @@ package ru.skillbranch.skillarticles.extensions
 import ru.skillbranch.skillarticles.data.AppSettings
 import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.local.User
+import ru.skillbranch.skillarticles.data.network.res.ArticleRes
 import ru.skillbranch.skillarticles.viewmodels.article.ArticleState
+import ru.skillbranch.skillarticles.viewmodels.articles.ArticleItem
 
-fun ArticleState.toAppSettings(): AppSettings{
+fun ArticleState.toAppSettings(): AppSettings {
     return AppSettings(isDarkMode, isBigText)
 }
 
-fun ArticleState.toArticlePersonalInfo(): ArticlePersonalInfo{
+fun ArticleState.toArticlePersonalInfo(): ArticlePersonalInfo {
     return ArticlePersonalInfo(isLike, isBookmark)
 }
 
-fun ArticleState.asMap():Map<String, Any?> = mapOf(
+fun ArticleState.asMap(): Map<String, Any?> = mapOf(
     "isAuth" to isAuth,
     "isLoadingContent" to isLoadingContent,
     "isLoadingReviews" to isLoadingReviews,
@@ -34,14 +36,34 @@ fun ArticleState.asMap():Map<String, Any?> = mapOf(
     "author" to author,
     "poster" to poster,
     "content" to content,
-    "reviews" to reviews
+    "reviews" to reviews,
+    "message" to message,
 )
 
 fun User.asMap(): Map<String, Any?> = mapOf(
-    "id"  to id,
-    "name"  to name,
-    "avatar"  to avatar,
-    "rating"  to rating,
-    "respect"  to respect,
-    "about"  to about
+    "id" to id,
+    "name" to name,
+    "avatar" to avatar,
+    "rating" to rating,
+    "respect" to respect,
+    "about" to about
 )
+
+fun ArticleRes.toArticleItem(): ArticleItem =
+    ArticleItem(
+        id = id,
+        date = date,
+        author = author,
+        authorAvatar = authorAvatar,
+        title = title,
+        description = description,
+        poster = poster,
+        categoryId = category,
+        category = category,
+        categoryIcon = categoryIcon,
+        likeCount = likeCount,
+        commentCount = commentCount,
+        readDuration = readDuration,
+        isBookmark = false
+    )
+
