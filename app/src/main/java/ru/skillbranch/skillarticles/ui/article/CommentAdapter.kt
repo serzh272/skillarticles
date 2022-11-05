@@ -35,5 +35,6 @@ class CommentDiffCallback : DiffUtil.ItemCallback<CommentRes>() {
 class CommentVH(convertView: View) : RecyclerView.ViewHolder(convertView) {
     fun bind(item: CommentRes, onClick: (CommentRes) -> Unit) {
         (itemView as CommentItemView).bind(item)
+        itemView.setOnClickListener { onClick(item) }
     }
 }

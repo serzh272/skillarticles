@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
@@ -78,8 +77,10 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var usedHeight = paddingTop
-        val width = View.getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
-        measureChild(tvDate, widthMeasureSpec, heightMeasureSpec)
+        val width = getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
+
+
+        measureChild(tvAnswerTo, widthMeasureSpec, heightMeasureSpec)
         if (tvAnswerTo.isVisible) usedHeight += tvAnswerTo.measuredHeight
         tvDate.minWidth = avatarSize
         measureChild(tvDate, widthMeasureSpec, heightMeasureSpec)
@@ -127,8 +128,15 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
             usedHeight + avatarSize
         )
         tvAuthor.layout(
+            ivAvatar.right + defaultHSpace / 2,
+            usedHeight + diffH,
+            ivAvatar.right + defaultHSpace / 2 + tvAuthor.measuredWidth,
+            usedHeight + tvAuthor.measuredHeight + diffH
+        )
+
+        tvDate.layout(
             tvAuthor.right + defaultHSpace / 2,
-            usedHeight + diffD,
+            usedHeight + diffH,
             tvAuthor.right + defaultHSpace / 2 + tvDate.measuredWidth,
             usedHeight + tvDate.measuredHeight + diffD
         )
@@ -159,7 +167,7 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
 
     fun bind(item: CommentRes) {
         val level = min(item.slug.split("/").size.dec(), 5)
-        setPaddingOptionally(left - level * defaultHSpace)
+        setPaddingOptionally(left = level * defaultHSpace)
 
         Glide.with(context)
             .load(item.user.avatar)
