@@ -117,10 +117,11 @@ object LocalDataHolder {
         )
     }
 
-    suspend fun loadArticles(offset: Int, limit: Int): List<ArticleItem> {
+    suspend fun loadArticles(offset: Int, limit: Int, query: String? = null): List<ArticleItem> {
         delay(500)
         return localArticles
             .values
+            .let { articles -> if (!query.isNullOrBlank()) articles.filter { it.title.contains(query) } else articles }
             .drop(offset)
             .take(limit)
     }
@@ -210,13 +211,16 @@ object NetworkDataHolder {
             comments.add(ind.inc(), comment)
             Log.e("DataHolder", "answer to $answerId $comment")
         }
-
-
     }
 
-    suspend fun loadArticles(offset: Int?, limit: Int = 10): List<ArticleRes> {
+    suspend fun loadArticles(
+        offset: Int?,
+        limit: Int = 10,
+        query: String? = null
+    ): List<ArticleRes> {
         delay(3000)
         return articles
+            .let { articles -> if (!query.isNullOrBlank()) articles.filter { it.title.contains(query) } else articles }
             .drop(offset ?: 0)
             .take(limit)
     }

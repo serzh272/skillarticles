@@ -1,5 +1,9 @@
 package ru.skillbranch.skillarticles.ui.articles
 
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.paging.CombinedLoadStates
@@ -21,11 +25,14 @@ class ArticlesFragment :
     override val viewBinding: FragmentArticlesBinding by viewBinding(FragmentArticlesBinding::bind)
     private var articlesAdapter: ArticlesAdapter? = null
 
+    private lateinit var searchView: SearchView
+
     override fun renderUi(data: ArticlesState) {
         //TODO implement me later
     }
 
     override fun setupViews() {
+        setHasOptionsMenu(true)
         with(viewBinding) {
             with(rvArticles) {
                 ArticlesAdapter(::onArticleClick, ::onToggleBookmark)
@@ -69,6 +76,9 @@ class ArticlesFragment :
         viewModel.articlesPager.observe(viewLifecycleOwner) {
             articlesAdapter?.submitData(viewLifecycleOwner.lifecycle, it)
         }
+        viewModel.articleQuery.observe(viewLifecycleOwner) {
+            viewModel.handleSearch()
+        }
     }
 
     private fun onArticleClick(articleItem: ArticleItem) {
@@ -77,6 +87,41 @@ class ArticlesFragment :
 
     private fun onToggleBookmark(articleItem: ArticleItem, isChecked: Boolean) {
         viewModel.checkBookmark(articleItem, isChecked)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_search, menu)
+        val menuItem = menu.findItem(R.id.action_search)
+        searchView = (menuItem?.actionView as SearchView)
+        searchView.queryHint = getString(R.string.article_search_placeholder)
+        if (viewModel.currentState.isSearch) {
+            menuItem.expandActionView()
+            searchView.setQuery(viewModel.currentState.searchQuery, false)
+            searchView.requestFocus()
+        } else {
+            searchView.clearFocus()
+        }
+        menuItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                return true
+            }
+        })
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                viewModel.setSearchQuery(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.setSearchQuery(newText)
+                return true
+            }
+        })
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
 }

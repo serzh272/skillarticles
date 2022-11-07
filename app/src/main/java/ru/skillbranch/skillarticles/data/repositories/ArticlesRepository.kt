@@ -14,15 +14,17 @@ class ArticlesRepository(
 
     fun findArticles(): LiveData<List<ArticleItem>> = local.findArticles()
 
-    fun makeArticleDataSource() = ArticlesDataSource(local)
+    fun makeArticleDataSource(query: String? = null) = ArticlesDataSource(local, query)
 
-    fun makeArticlesMediator() = ArticlesMediator(network = network, local)
+    fun makeArticlesMediator(query: String? = null) =
+        ArticlesMediator(network = network, local = local, query = query)
 }
 
 @OptIn(ExperimentalPagingApi::class)
 class ArticlesMediator(
     val network: NetworkDataHolder,
-    val local: LocalDataHolder
+    val local: LocalDataHolder,
+    val query: String? = null
 ) : RemoteMediator<Int, ArticleItem>() {
     override suspend fun load(
         loadType: LoadType,
@@ -31,7 +33,7 @@ class ArticlesMediator(
         return try {
             when (loadType) {
                 LoadType.REFRESH -> {
-                    val article = network.loadArticles(null, state.config.pageSize)
+                    val article = network.loadArticles(null, state.config.pageSize, query)
                     local.insertArticles(article.map { it.toArticleItem() })
                     MediatorResult.Success(endOfPaginationReached = false)
                 }
@@ -39,7 +41,11 @@ class ArticlesMediator(
                 LoadType.APPEND -> {
                     val lastItem = state.lastItemOrNull()
                     val articles =
-                        network.loadArticles(lastItem?.id?.toInt()?.inc(), state.config.pageSize)
+                        network.loadArticles(
+                            lastItem?.id?.toInt()?.inc(),
+                            state.config.pageSize,
+                            query
+                        )
                     local.insertArticles(articles.map { it.toArticleItem() })
                     MediatorResult.Success(endOfPaginationReached = articles.isEmpty())
                 }
@@ -51,7 +57,8 @@ class ArticlesMediator(
 
 }
 
-class ArticlesDataSource(val local: LocalDataHolder) : PagingSource<Int, ArticleItem>() {
+class ArticlesDataSource(val local: LocalDataHolder, val query: String? = null) :
+    PagingSource<Int, ArticleItem>() {
 
     init {
         local.attachDataSource(this)
@@ -70,7 +77,7 @@ class ArticlesDataSource(val local: LocalDataHolder) : PagingSource<Int, Article
         val pageKey = params.key ?: 0
         val pageSize = params.loadSize
         return try {
-            val articles = local.loadArticles(pageKey, pageSize)
+            val articles = local.loadArticles(pageKey, pageSize, query)
             val prevKey = if (pageKey > 0) pageKey.minus(pageSize) else null
             val nextKey = if (articles.isNotEmpty()) pageKey.plus(pageSize) else null
             LoadResult.Page(
