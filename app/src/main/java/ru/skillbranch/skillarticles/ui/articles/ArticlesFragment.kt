@@ -77,7 +77,7 @@ class ArticlesFragment :
             articlesAdapter?.submitData(viewLifecycleOwner.lifecycle, it)
         }
         viewModel.articleQuery.observe(viewLifecycleOwner) {
-            viewModel.handleSearch()
+            articlesAdapter?.refresh()
         }
     }
 
